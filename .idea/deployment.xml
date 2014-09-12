@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" serverName="buffo_s/cms">
+  <component name="PublishConfigData" serverName="buffo_s/cms" promptOnLocalOverwrite="false">
     <serverData>
       <paths name="buffo_s/cms">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/" local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="buffo_s/dev/cms">
         <serverdata>
           <mappings>
             <mapping deploy="/" local="$PROJECT_DIR$" web="/" />

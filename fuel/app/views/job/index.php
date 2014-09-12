@@ -23,7 +23,14 @@
                         else if($item['job_type'] == "contest") echo "Contest";
                     ?></td>
                     <td><?php echo $cats[$item['cat_id']]; ?></td>
-                    <td><?php echo $item['job_is_active']?"<i class=\"fa fa-check-circle color-green\"> </i> ปกติ":"<i class=\"fa fa-ban color-red\"> </i> ระงับ"; ?></td>
+                    <td>
+                        <?php if($item['job_is_active'] == 2){ ?>
+                            <i class="fa fa-check-circle color-green"> </i> เผยแพร่
+                        <?php } else if($item['job_is_active'] == 1){ ?>
+                            <i class="fa fa-circle color-orange"> </i> รอการตรวจสอบ
+                        <?php } else if($item['job_is_active'] == 0) { ?>
+                            <i class="fa fa-ban color-red"> </i> ระงับ
+                        <?php } ?></td>
                     <td>
                         <?php echo Html::anchor('job/edit/' . $item['id'], '<i class="fa fa-wrench"></i> แก้ไขข้อมูล'); ?>&nbsp;&nbsp;						
                         <?php echo Html::anchor('job/delete/' . $item['id'], '<i class="fa fa-trash-o"></i> ลบข้อมูล', array('onclick' => "return confirm('Job #".$item['id']." will be deleted. Continue?')")); ?>

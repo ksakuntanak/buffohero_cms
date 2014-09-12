@@ -140,6 +140,13 @@
                 <?php echo Form::textarea('job_desc', Input::post('job_desc', isset($job) ? $job->job_desc : ''), array('class' => 'form-control htmltextarea', 'rows' => 8, 'placeholder' => 'ระบุรายละเอียด', 'id' => 'htmltextarea')); ?>
             </div>
         </div>
+        <div class="form-group" id="job-qualifications" <?php if(!isset($job) || $job->job_type!="fulltime") { ?>style="display:none;"<?php } ?>>
+            <?php echo Form::label('คุณสมบัติ', 'job_qualifications', array('class' => 'control-label')); ?>
+            <div class="controls form-group">
+                <?php echo Form::input('job_qualifications', Input::post('job_qualifications', isset($job) ? $job->job_qualifications : ''), array('class' => 'form-control', 'placeholder' => 'ระบุคุณสมบัติ')); ?>
+                <p class="help-block">คั่นแต่ละคุณสมบัติด้วย comma (,)</p>
+            </div>
+        </div>
         <div class="form-group" id="job-skills" <?php if(!isset($job)) { ?>style="display:none;"<?php } ?>>
             <?php echo Form::label('ทักษะที่จำเป็น', 'job_skills', array('class' => 'control-label')); ?>
             <div class="controls form-group">
@@ -147,17 +154,17 @@
                 <p class="help-block">คั่นแต่ละทักษะด้วย comma (,)</p>
             </div>
         </div>
+        <div class="form-group" id="job-tags" <?php if(!isset($job)) { ?>style="display:none;"<?php } ?>>
+            <?php echo Form::label('แท็ก', 'job_tags', array('class' => 'control-label')); ?>
+            <div class="controls form-group">
+                <?php echo Form::input('job_tags', Input::post('job_tags', isset($job) ? $job->job_tags : ''), array('class' => 'form-control', 'placeholder' => 'ระบุแท็ก')); ?>
+                <p class="help-block">คั่นแต่ละทักษะด้วย comma (,)</p>
+            </div>
+        </div>
         <div class="form-group" id="job-position" <?php if(!isset($job) || $job->job_type!="fulltime") { ?>style="display:none;"<?php } ?>>
             <?php echo Form::label('จำนวนที่รับ <span class="required">*</span>', 'job_position', array('class' => 'control-label')); ?>
             <div class="controls form-group">
                 <?php echo Form::input('job_position', Input::post('job_position', isset($job) ? $job->job_position : ''), array('class' => 'form-control', 'placeholder' => 'ระบุจำนวนที่รับ (เป็นตัวเลข)')); ?>
-            </div>
-        </div>
-        <div class="form-group" id="job-qualifications" <?php if(!isset($job) || $job->job_type!="fulltime") { ?>style="display:none;"<?php } ?>>
-            <?php echo Form::label('คุณสมบัติ', 'job_qualifications', array('class' => 'control-label')); ?>
-            <div class="controls form-group">
-                <?php echo Form::input('job_qualifications', Input::post('job_qualifications', isset($job) ? $job->job_qualifications : ''), array('class' => 'form-control', 'placeholder' => 'ระบุคุณสมบัติ')); ?>
-                <p class="help-block">คั่นแต่ละคุณสมบัติด้วย comma (,)</p>
             </div>
         </div>
         <div class="form-group" id="job-areas" <?php if(!isset($job) || $job->job_type!="fulltime") { ?>style="display:none;"<?php } ?>>
@@ -241,8 +248,11 @@
             <?php echo Form::label('สถานะ', 'job_is_active', array('class' => 'control-label')); ?>
             <div class="controls form-group">
                 <div class="btn-group" data-toggle="buttons">
+                    <label id="active_1" class="btn btn-<?php echo (isset($job)&&$job->job_is_active==2)?"primary":"default"; ?>" data-toggle-class="btn-primary" data-toggle-passive-class="btn-default">
+                        <input type="radio" name="job_is_active" value="2" <?php if(isset($job) && $job->job_is_active == 2){ ?>checked="checked" <?php } ?>> เผยแพร่
+                    </label>
                     <label id="active_1" class="btn btn-<?php echo (isset($job)&&$job->job_is_active==1)?"primary":"default"; ?>" data-toggle-class="btn-primary" data-toggle-passive-class="btn-default">
-                        <input type="radio" name="job_is_active" value="1" <?php if(isset($job) && $job->job_is_active == 1){ ?>checked="checked" <?php } ?>> ปกติ
+                        <input type="radio" name="job_is_active" value="1" <?php if(isset($job) && $job->job_is_active == 1){ ?>checked="checked" <?php } ?>> รอการอนุมัติ
                     </label>
                     <label id="active_0" class="btn btn-<?php echo (isset($job)&&$job->job_is_active==0)?"danger":"default"; ?>" data-toggle-class="btn-danger" data-toggle-passive-class="btn-default">
                         <input type="radio" name="job_is_active" value="0" <?php if(isset($job) && $job->job_is_active == 0){ ?>checked="checked" <?php } ?>> ระงับ

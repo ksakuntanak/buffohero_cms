@@ -69,7 +69,7 @@ class Controller_Employee extends Controller_Common {
 
     }
 
-    public function action_create() {
+    /*public function action_create() {
 
         if (Input::method() == 'POST') {
 
@@ -180,11 +180,11 @@ class Controller_Employee extends Controller_Common {
             Response::redirect('employee');
         }
 
-        /*if (Input::method() == 'POST') {
+        if (Input::method() == 'POST') {
             $data = Input::post();
             print_r($data);
             exit();
-        }*/
+        }
 
         $val = Model_Employee::validate('edit');
 
@@ -289,17 +289,146 @@ class Controller_Employee extends Controller_Common {
         $this->theme->get_template()->set_global('cats',Model_Employee::get_job_cats(),false);
         $this->theme->get_template()->set_global('menu',"edit",false);
         $this->theme->set_partial('left', 'employee/edit');
-    }
+    }*/
 
     public function action_delete($id = null) {
+
         is_null($id) and Response::redirect('employee');
+
         if ($employee = Model_Employee::find($id)) {
+
+            $user = Model_User::find($employee->user_id);
+
+            // delete all user's record
+            DB::query("DELETE FROM buff_jobs_views WHERE user_id = ".$employee->user_id)->execute();
+
+            DB::query("DELETE FROM buff_expects WHERE employee_id = ".$id)->execute();
+            DB::query("DELETE FROM buff_experiences WHERE employee_id = ".$id)->execute();
+            DB::query("DELETE FROM buff_portfolios WHERE employee_id = ".$id)->execute();
+            DB::query("DELETE FROM buff_schools WHERE employee_id = ".$id)->execute();
+            DB::query("DELETE FROM buff_skills WHERE employee_id = ".$id)->execute();
+
+            DB::query("DELETE FROM buff_employees_customs WHERE employee_id = ".$id)->execute();
+            DB::query("DELETE FROM buff_employees_favorites WHERE employee_id = ".$id)->execute();
+            DB::query("DELETE FROM buff_employees_picks WHERE employee_id = ".$id)->execute();
+
+            DB::query("DELETE FROM buff_jobs_applys WHERE employee_id = ".$id)->execute();
+            DB::query("DELETE FROM buff_jobs_favorites WHERE employee_id = ".$id)->execute();
+
+            // delete user
+            $user->delete();
+
+            // delete employee
             $employee->delete();
+
             Session::set_flash('success', 'Deleted employee #' . $id);
+
         } else {
             Session::set_flash('error', 'Could not delete employee #' . $id);
         }
+
         Response::redirect('employee');
+
+    }
+
+    public function action_staffPicks(){
+
+        $page = Input::get('page')?Input::get('page'):1;
+        $query = Input::get('query')?Input::get('query'):"";
+
+        $data['employees'] = Model_EmployeePick::get_staff_picks($page);
+
+        $data['page'] = $page;
+        $data['total_page'] = ceil($data['employees']['total']/20);
+
+        $config = array(
+            'pagination_url' => "",
+            'total_items'    => $data['employees']['total'],
+            'per_page'       => 20,
+            'uri_segment'    => 2,
+            'current_page'   => $page
+        );
+        $pagination = Pagination::forge('pagenav',$config);
+        $data['pagination'] = $pagination->render();
+
+        $this->theme->set_template('index');
+
+        $this->theme->get_template()->set_global('current_menu', "Employees");
+        $this->theme->get_template()->set_global('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้หางานทั้งหมดในระบบ");
+        $this->theme->get_template()->set('breadcrumb', array(
+            array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
+            array('title' => "Employees", 'icon' => "eicon-users", 'link' => Uri::create('employee'), 'active' => false),
+            array('title' => "Staff Picks", 'icon' => "fa-star", 'link' => "", 'active' => true)
+        ));
+
+        $this->theme->get_template()->set_global('query',$query,false);
+
+        $this->theme->set_partial('sidebar','common/sidebar');
+
+        $this->theme->set_partial('content', 'employee/staff_picks')->set($data);
+
+    }
+
+    public function action_addStaffPick($id){
+
+        is_null($id) and Response::redirect('employee');
+
+        $employee = Model_Employee::find($id);
+
+        if(Input::method() == "POST"){
+
+            $pick = Model_EmployeePick::forge(array(
+                'employee_id' => Input::post('employee_id'),
+                'pick_date' => Input::post('pick_date'),
+                'pick_is_active' => Input::post('pick_is_active'),
+                'created_at' => time()
+            ));
+
+            if($pick && $pick->save()){
+                Session::set_flash('success', 'Added employee #'.$id.' to Staff Picks.');
+                Response::redirect('employee/staffPicks');
+            } else {
+                Session::set_flash('error', 'Could not save employee pick.');
+            }
+
+        }
+
+        $data['employee'] = $employee;
+
+        $this->theme->set_template('edit');
+
+        $this->theme->get_template()->set_global('provinces', Model_Province::get_provinces('th'));
+
+        $this->theme->get_template()->set_global('current_menu', "Employees");
+        $this->theme->get_template()->set_global('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้หางานทั้งหมดในระบบ");
+        $this->theme->get_template()->set('breadcrumb', array(
+            array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
+            array('title' => "Employees", 'icon' => "eicon-users", 'link' => Uri::create('employee'), 'active' => false),
+            array('title' => "Add Staff Pick", 'icon' => "fa-plus", 'link' => "", 'active' => true)
+        ));
+
+        $this->theme->set_partial('sidebar','common/sidebar');
+
+        $this->theme->set_partial('left', 'employee/add_staff_pick')->set($data);
+
+    }
+
+    public function action_deleteStaffPick($id = null) {
+
+        is_null($id) and Response::redirect('employee/staffPicks');
+
+        if ($pick = Model_EmployeePick::find($id)) {
+
+            $pick->delete();
+
+            Session::set_flash('success', 'Deleted Staff Pick #' . $id);
+
+        } else {
+            Session::set_flash('error', 'Could not delete Staff Pick #' . $id);
+        }
+
+        Response::redirect('employee/staffPicks');
+
     }
 
     public function after($response) {

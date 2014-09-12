@@ -4,11 +4,37 @@
         <table class="table">
             <tr>
                 <td>Username</td>
-                <td><?php echo $employee['username']; ?></td>
+                <td>
+                    <?php if($employee['fb_login']){ ?>
+                        <i class="fa fa-facebook-square"></i>
+                    <?php } else { ?>
+                        <i class="fa fa-envelope-o"></i>
+                    <?php } ?>
+                    <?php echo $employee['username']; ?>
+                </td>
             </tr>
             <tr>
                 <td>เข้าสู่ระบบล่าสุดเมื่อ</td>
                 <td><?php echo date('M d, Y H:i:s',$employee['last_login']); ?></td>
+            </tr>
+        </table>
+    </div>
+</section>
+<section class="widget">
+    <legend class="section">ข้อมูลการแสดงผล</legend>
+    <div class="body">
+        <table class="table">
+            <tr>
+                <td>สถานะผู้หางาน</td>
+                <td><?php echo $employee['custom']['working_status']?"ทำงานแล้ว":"กำลังหางาน"; ?></td>
+            </tr>
+            <tr>
+                <td>เผยแพร่เรซูเม่อยู่?</td>
+                <td><?php echo $employee['custom']['resume_published']?"ใช่":"ไม่ใช่"; ?></td>
+            </tr>
+            <tr>
+                <td>เผยแพร่แฟ้มผลงานอยู่?</td>
+                <td><?php echo $employee['custom']['portfolio_published']?"ใช่":"ไม่ใช่"; ?></td>
             </tr>
         </table>
     </div>
@@ -172,6 +198,7 @@
         </div>
     </section>
 <?php } ?>
+<?php if(count($employee['comp_skills']) || count($employee['lang_skills']) || count($employee['other_skills'])) { ?>
 <section class="widget">
     <legend class="section">ทักษะ</legend>
     <div class="body">
@@ -228,10 +255,12 @@
         <?php } ?>
     </div>
 </section>
+<?php } ?>
 <section class="widget">
     <a class="btn btn-default" href="<?php echo Uri::create('employee'); ?>">ย้อนกลับ</a>
     <div class="pull-right">
-
+        <a class="btn btn-success" href="<?php echo Uri::create('employee/addStaffPick/'.$employee['id']); ?>">เพิ่มใน Staff Pick</a>
+        <a class="btn btn-danger" href="<?php echo Uri::create('employee/delete/'.$employee['id']); ?>">ลบผู้ใช้งาน</a>
     </div>
 </section>
 <script type="text/javascript">

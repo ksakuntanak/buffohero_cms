@@ -214,6 +214,7 @@ class Controller_Job extends Controller_Common {
                         'subcat_id' => Input::post('subcat_id'),
                         'job_qualifications' => Input::post('job_qualifications'),
                         'job_skills' => Input::post('job_skills'),
+                        'job_tags' => Input::post('job_tags'),
                         'job_attachment' => $job_attachment,
                         'job_is_featured' => Input::post('job_is_featured'),
                         'job_is_urgent' => Input::post('job_is_urgent'),
@@ -430,6 +431,7 @@ class Controller_Job extends Controller_Common {
                     $job->subcat_id = Input::post('subcat_id');
                     $job->job_qualifications = Input::post('job_qualifications');
                     $job->job_skills = Input::post('job_skills');
+                    $job->job_tags = Input::post('job_tags');
                     if(strlen($job_attachment)) $job->job_attachment = $job_attachment;
                     $job->job_is_featured = Input::post('job_is_featured');
                     $job->job_is_urgent = Input::post('job_is_urgent');

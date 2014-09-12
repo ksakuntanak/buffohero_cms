@@ -6,32 +6,34 @@ class Model_Employee extends Model {
 
     protected static $_properties = array(
         'id',
-        'username',
-        'password',
-        'email',
-        'group',
-        'last_login',
-        'login_hash',
-        'profile_fields',
+        'user_id',
         'employee_title',
         'employee_other_title',
-        'employee_first_name',
-        'employee_last_name',
+        'employee_firstname',
+        'employee_lastname',
+        'employee_nickname',
+        'employee_display_name',
+        'employee_display_position',
+        'employee_gender',
         'employee_nationality',
         'employee_other_nationality',
-        'employee_gender',
         'employee_bdate',
         'employee_addr',
+        'province_id',
+        'employee_zipcode',
         'employee_country',
-        'employee_mobile',
         'employee_phone',
+        'employee_email',
         'employee_weight',
         'employee_height',
-        'employee_job_type',
-        'employee_keywords',
+        'employee_prefer',
         'employee_about',
         'employee_skills',
-        'created_date'
+        'employee_photo',
+        'employee_is_featured',
+        'employee_is_active',
+        'created_at',
+        'updated_at'
     );
     protected static $_observers = array(
         'Orm\Observer_CreatedAt' => array(
@@ -74,9 +76,10 @@ class Model_Employee extends Model {
 
     public static function get_employees($page = 1){
 
-        $query = DB::select('employees.*','users.username','users.last_login')->from('employees')
+        $query = DB::select('employees.*','users.username','users.last_login','users.fb_login')->from('employees')
             ->join('users','inner')
             ->on('employees.user_id','=','users.id')
+            ->order_by('users.last_login','desc')
             ->limit(20)->offset(($page-1)*20)
             ->execute()->as_array();
 
@@ -99,7 +102,7 @@ class Model_Employee extends Model {
 
     public static function get_employee($id){
 
-        $query = DB::select('employees.*','users.username','users.last_login')->from('employees')
+        $query = DB::select('employees.*','users.username','users.last_login','users.fb_login')->from('employees')
             ->join('users','inner')
             ->on('employees.user_id','=','users.id')
             ->where('employees.id','=',$id)
@@ -108,6 +111,8 @@ class Model_Employee extends Model {
         if(count($query)) {
 
             $result = $query[0];
+
+            $result['custom'] = Model_EmployeeCustom::get_employee_custom($id);
 
             $result['expect'] = Model_Expect::get_expects($id);
             $result['experience'] = Model_Experience::get_experience($id);

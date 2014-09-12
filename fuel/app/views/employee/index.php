@@ -14,13 +14,20 @@
         <?php foreach ($employees['rows'] as $item): ?>
             <tr>
                 <td><?php echo $item['id']; ?></td>
-                <td><?php echo $item['username']; ?></td>
+                <td>
+                    <?php if($item['fb_login']){ ?>
+                        <i class="fa fa-facebook-square"></i>
+                    <?php } else { ?>
+                        <i class="fa fa-envelope-o"></i>
+                    <?php } ?>
+                    <?php echo $item['username']; ?>
+                </td>
                 <td><?php echo $item['employee_display_name']; ?></td>
                 <td><?php echo date('M d, Y H:i:s',$item['last_login']); ?></td>
                 <td><?php echo $item['employee_is_active']?"ปกติ":"ระงับ"; ?></td>
                 <td>
                     <?php echo Html::anchor('employee/view/' . $item['id'], '<i class="fa fa-eye"></i> ดูข้อมูล'); ?>&nbsp;&nbsp;
-                    <?php echo Html::anchor('employee/delete/' . $item['id'], '<i class="fa fa-trash-o"></i> ลบผู้ใช้งาน', array('onclick' => "return confirm('Employee #".$item['id']." will be deleted. Continue?')")); ?>
+                    <?php echo Html::anchor('employee/delete/' . $item['id'], '<i class="fa fa-trash-o"></i> ลบผู้ใช้งาน', array('onclick' => "return confirm('ข้อมูลอื่นๆ เกี่ยวกับผู้หางานคนนี้จะถูกลบทิ้งด้วย ดำเนินการต่อ?')")); ?>
                 </td>
             </tr>
         <?php endforeach; ?>
@@ -39,7 +46,7 @@
     var totalPage = <?php echo $total_page; ?>;
 
     function toPage(next){
-        window.location.href = "<?php echo Uri::create('blog'); ?>/?page="+next;
+        window.location.href = "<?php echo Uri::create('employee'); ?>/?page="+next;
     }
 
     function firstPage(){

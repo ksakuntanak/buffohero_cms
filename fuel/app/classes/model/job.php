@@ -8,6 +8,7 @@ class Model_Job extends Model {
 
     protected static $_properties = array(
         'id',
+        'ref_no',
         'employer_id',
         'job_title',
         'job_type',
@@ -18,6 +19,7 @@ class Model_Job extends Model {
         'job_areas',
         'job_qualifications',
         'job_skills',
+        'job_tags',
         'job_welfare',
         'job_salary',
         'job_salary_negotiable',
