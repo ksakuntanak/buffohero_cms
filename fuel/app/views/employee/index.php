@@ -27,6 +27,7 @@
                 <td><?php echo $item['employee_is_active']?"ปกติ":"ระงับ"; ?></td>
                 <td>
                     <?php echo Html::anchor('employee/view/' . $item['id'], '<i class="fa fa-eye"></i> ดูข้อมูล'); ?>&nbsp;&nbsp;
+                    <?php echo Html::anchor('employee/portfolio/' . $item['id'], '<i class="fa fa-picture-o"></i> Portfolio'); ?>&nbsp;&nbsp;
                     <?php echo Html::anchor('employee/delete/' . $item['id'], '<i class="fa fa-trash-o"></i> ลบผู้ใช้งาน', array('onclick' => "return confirm('ข้อมูลอื่นๆ เกี่ยวกับผู้หางานคนนี้จะถูกลบทิ้งด้วย ดำเนินการต่อ?')")); ?>
                 </td>
             </tr>

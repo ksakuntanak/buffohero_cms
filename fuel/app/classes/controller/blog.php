@@ -11,34 +11,26 @@ class Controller_Blog extends Controller_Common {
 
         $page = Input::get('page')?Input::get('page'):1;
         $query = Input::get('query')?Input::get('query'):"";
-        
-        if (strlen($query)) {
-            $data['blogs'] = DB::select('*')->from('blogs')
-                ->where('blog_title','LIKE','%'.$query.'%')
-                ->limit(30)->offset(($page-1)*30)
-                ->execute()->as_array();
-        } else {
-            $data['blogs'] = DB::select('*')->from('blogs')
-                ->limit(30)->offset(($page-1)*30)
-                ->execute()->as_array();
-        }
 
-        $total_rec = DB::count_last_query();
+        $blogs = Model_Blog::get_blogs($page,$query);
 
-        $data['total_page'] = ceil($total_rec/30);
+        $data['total_page'] = ceil($blogs['total']/30);
         $data['page'] = $page;
-        
+
+        $data['blogs'] = $blogs;
+
         $config = array(
             'pagination_url' => "",
-            'total_items'    => $total_rec,
+            'total_items'    => $blogs['total'],
             'per_page'       => 30,
             'uri_segment'    => 2,
             'current_page' => $page
         );
+
         $pagination = Pagination::forge('pagenav',$config);
         $data['pagination'] = $pagination->render();
 
-        $cats = Model_Category::get_categories();
+        $data['featured_blogs'] = Model_Blog::get_featured_blogs();
 
         $this->theme->set_template('index');
 
@@ -51,7 +43,6 @@ class Controller_Blog extends Controller_Common {
         ));
 
         $this->theme->get_template()->set_global('query',$query,false);
-        $this->theme->get_template()->set_global('cats',$cats,false);
 
         $this->theme->set_partial('sidebar','common/sidebar');
 
@@ -346,6 +337,50 @@ class Controller_Blog extends Controller_Common {
             Session::set_flash('error', 'Could not delete blog #' . $id);
         }
         Response::redirect('blog');
+    }
+
+    public function action_makeFeatured($id = null) {
+
+        is_null($id) and Response::redirect('blog');
+
+        $blog = Model_Blog::find($id);
+
+        if($blog){
+
+            $blog->blog_featured = 1;
+
+            if ($blog->save()) {
+                Session::set_flash('success', 'Blog #'.$id.' is now featured.');
+            } else {
+                Session::set_flash('error', 'Could not make blog #'.$id.' featured.');
+            }
+
+        }
+
+        Response::redirect('blog');
+
+    }
+
+    public function action_undoFeatured($id = null) {
+
+        is_null($id) and Response::redirect('blog');
+
+        $blog = Model_Blog::find($id);
+
+        if($blog){
+
+            $blog->blog_featured = 0;
+
+            if ($blog->save()) {
+                Session::set_flash('success', 'Blog #'.$id.' is now featured.');
+            } else {
+                Session::set_flash('error', 'Could not make blog #'.$id.' featured.');
+            }
+
+        }
+
+        Response::redirect('blog');
+
     }
 
     public function after($response) {

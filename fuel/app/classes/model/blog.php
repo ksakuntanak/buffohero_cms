@@ -12,6 +12,7 @@ class Model_Blog extends Model {
         'blog_short_detail',
         'blog_detail',
         'blog_cover_photo',
+        'blog_featured',
         'blog_published',
         'created_at',
         'published_at',
@@ -36,6 +37,39 @@ class Model_Blog extends Model {
         $val->add_field('blog_title', 'Blog Title', 'required|max_length[255]');
 
         return $val;
+
+    }
+
+    public static function get_blogs($page = 1, $query = ""){
+
+        $rows = DB::select('*')->from('blogs')
+            ->where('blog_featured','=',0);
+
+        if(strlen($query))
+            $rows = $rows->and_where('blog_title','LIKE','%'.$query.'%');
+
+        $rows = $rows->limit(30)->offset(($page-1)*30)
+            ->execute()->as_array();
+
+        $total = DB::count_last_query();
+
+        $result = array(
+            'total' => $total,
+            'rows' => $rows
+        );
+
+        return $result;
+
+    }
+
+    public static function get_featured_blogs(){
+
+        $rows = DB::select('*')->from('blogs')
+            ->where('blog_featured','=',1)
+            ->limit(2)->offset(0)
+            ->execute()->as_array();
+
+        return $rows;
 
     }
 

@@ -42,6 +42,9 @@
         <li class="<?php if($controller == 'client') { ?>active<?php } else { ?>panel<?php } ?>">
             <a href="<?php echo Uri::create('client'); ?>"><i class="fa fa-smile-o"></i> <span class="name">Clients</span></a>
         </li>
+        <li class="<?php if($controller == 'filemanager') { ?>active<?php } else { ?>panel<?php } ?>">
+            <a href="<?php echo Uri::create('filemanager'); ?>"><i class="fa fa-folder-open-o"></i> <span class="name">File Manager</span></a>
+        </li>
         <li class="<?php if($controller == 'help') { ?>active<?php } else { ?>panel<?php } ?>">
             <a href="<?php echo Uri::create('help'); ?>"><i class="fa fa-question-circle"></i> <span class="name">Helps</span></a>
         </li>

@@ -32,7 +32,7 @@ class Controller_Employee extends Controller_Common {
         $this->theme->get_template()->set_global('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้หางานทั้งหมดในระบบ");
         $this->theme->get_template()->set('breadcrumb', array(
             array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
-            array('title' => "Employees", 'icon' => "eicon-users", 'link' => "", 'active' => true)
+            array('title' => "Employees", 'icon' => "fa-users", 'link' => "", 'active' => true)
         ));
 
         $this->theme->get_template()->set_global('query',$query,false);
@@ -59,7 +59,7 @@ class Controller_Employee extends Controller_Common {
         $this->theme->get_template()->set_global('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้หางานทั้งหมดในระบบ");
         $this->theme->get_template()->set('breadcrumb', array(
             array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
-            array('title' => "Employees", 'icon' => "eicon-users", 'link' => Uri::create('employee'), 'active' => false),
+            array('title' => "Employees", 'icon' => "fa-users", 'link' => Uri::create('employee'), 'active' => false),
             array('title' => "View", 'icon' => "fa-eye", 'link' => "", 'active' => true)
         ));
 
@@ -69,227 +69,35 @@ class Controller_Employee extends Controller_Common {
 
     }
 
-    /*public function action_create() {
+    public function action_portfolio($id = null) {
 
-        if (Input::method() == 'POST') {
-
-            $val = Model_Employee::validate('create');
-
-            $val->add_field('password', 'Password', 'required|min_length[8]|max_length[20]');
-            $val->add_field('password_re', 'Re-type Password', 'required|min_length[8]|max_length[20]');
-
-            if(Input::post('employee_title') == "other") $val->add_field('employee_other_title', 'คำนำหน้าอื่นๆ', 'required|max_length[255]');
-
-            if(Input::post('employee_nationality') == "other") $val->add_field('employee_other_nationality', 'สัญชาติอื่นๆ', 'required|max_length[255]');
-
-            $error = false;
-
-            if ($val->run()) {
-
-                if(strlen(Input::post('password')) && Input::post('password') != Input::post('password_re')){
-                    Session::set_flash('error', 'กรุณากรอก Password ทั้งสองช่องให้ตรงกัน');
-                    $error = true;
-                }
-
-                if(!count(Input::post('employee_keywords'))){
-                    Session::set_flash('error', 'กรุณาระบุสาขางานที่สนใจอย่างน้อย 1 อย่าง');
-                    $error = true;
-                }
-
-                if(!$error) {
-
-                    $created_date = date('Y-m-d H:i:s');
-
-                    $employee = Model_Employee::forge(array(
-                        'username' => Input::post('username'),
-                        'password' => Auth::instance()->hash_password(Input::post('password')),
-                        'email' => Input::post('username'),
-                        'group' => 1,
-                        'employee_title' => Input::post('employee_title'),
-                        'employee_other_title' => Input::post('employee_other_title'),
-                        'employee_first_name' => Input::post('employee_first_name'),
-                        'employee_last_name' => Input::post('employee_last_name'),
-                        'employee_gender' => Input::post('employee_gender'),
-                        'employee_nationality' => Input::post('employee_nationality'),
-                        'employee_other_nationality' => Input::post('employee_other_nationality'),
-                        'employee_bdate' => Input::post('employee_bdate'),
-                        'employee_addr' => Input::post('employee_addr'),
-                        'employee_country' => Input::post('employee_country'),
-                        'employee_mobile' => Input::post('employee_mobile'),
-                        'employee_phone' => Input::post('employee_phone'),
-                        'employee_weight' => Input::post('employee_weight'),
-                        'employee_height' => Input::post('employee_height'),
-                        'employee_job_type' => Input::post('employee_job_type'),
-                        'employee_keywords' => implode(",",Input::post('employee_keywords')),
-                        'employee_about' => Input::post('employee_about'),
-                        'employee_skills' => Input::post('employee_skills'),
-                        'created_date' => $created_date,
-                        'last_login' => Input::post('last_login'),
-                        'login_hash' => Input::post('login_hash')
-                    ));
-
-                    if ($employee and $employee->save()){
-                        Session::set_flash('success', 'Added employee #' . $employee->id . '.');
-                        Response::redirect('employee');
-                    } else {
-                        Session::set_flash('error', 'Could not save employee.');
-                    }
-
-                }
-
-            } else {
-                $msg = '<ul>';
-                foreach ($val->error() as $field => $error){
-                    $msg .= '<li>'.$error->get_message().'</li>';
-                }
-                $msg .= '</ul>';
-                Session::set_flash('error', $msg);
-            }
-        }
-
-        $this->theme->set_template('edit');
-        $this->theme->get_template()->set('current_menu', "Employees");
-        $this->theme->get_template()->set('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้หางานทั้งหมดในระบบ");
-        $this->theme->get_template()->set('page_specific_js', "form_employee.js");
-        $this->theme->get_template()->set('breadcrumb', array(
-            array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
-            array('title' => "Employees", 'icon' => "eicon-users", 'link' => Uri::create('employee/index'), 'active' => false),
-            array('title' => "Create", 'icon' => "", 'link' => "", 'active' => true)
-        ));
-        $this->theme->get_template()->set_global('countries',Controller_Common::get_countries(),false);
-        $this->theme->get_template()->set_global('cats',Model_Employee::get_job_cats(),false);
-        $this->theme->get_template()->set_global('menu',"create",false);
-        $this->theme->set_partial('left', 'employee/create');
-
-    }
-
-    public function action_edit($id = null) {
         is_null($id) and Response::redirect('employee');
 
-        $this->theme->set_template('edit');
-        $this->theme->get_template()->set('current_menu', "Employees");
-        $this->theme->get_template()->set('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้หางานทั้งหมดในระบบ");
+        $employee = Model_Employee::get_employee($id);
+
+        $data['employee'] = $employee;
+
+        $portfolios = Model_Portfolio::get_portfolios($id);
+
+        $data['portfolios'] = $portfolios;
+
+        $this->theme->set_template('index');
+
+        $this->theme->get_template()->set_global('provinces', Model_Province::get_provinces('th'));
+
+        $this->theme->get_template()->set_global('current_menu', "Employees");
+        $this->theme->get_template()->set_global('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้หางานทั้งหมดในระบบ");
         $this->theme->get_template()->set('breadcrumb', array(
             array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
-            array('title' => "Employees", 'icon' => "eicon-users", 'link' => Uri::create('employee/index'), 'active' => false),
-            array('title' => "Edit", 'icon' => "", 'link' => "", 'active' => true)
+            array('title' => "Employees", 'icon' => "fa-users", 'link' => Uri::create('employee'), 'active' => false),
+            array('title' => "Portfolios", 'icon' => "fa-picture-o", 'link' => "", 'active' => true)
         ));
 
-        if (!$employee = Model_Employee::find($id)) {
-            Session::set_flash('error', 'Could not find employee #' . $id);
-            Response::redirect('employee');
-        }
+        $this->theme->set_partial('sidebar','common/sidebar');
 
-        if (Input::method() == 'POST') {
-            $data = Input::post();
-            print_r($data);
-            exit();
-        }
+        $this->theme->set_partial('content', 'employee/portfolio')->set($data);
 
-        $val = Model_Employee::validate('edit');
-
-        if(strlen(Input::post('password'))){
-            $val->add_field('password', 'Password', 'required|min_length[8]|max_length[20]');
-            $val->add_field('password_re', 'Re-type Password', 'required|min_length[8]|max_length[20]');
-        }
-
-        if(Input::post('employee_title') == "other") $val->add_field('employee_other_title', 'คำนำหน้าอื่นๆ', 'required|max_length[255]');
-
-        if(Input::post('employee_nationality') == "other") $val->add_field('employee_other_nationality', 'สัญชาติอื่นๆ', 'required|max_length[255]');
-
-        $error = false;
-
-        if ($val->run()) {
-
-            if(strlen(Input::post('password')) && Input::post('password') != Input::post('password_re')){
-                Session::set_flash('error', 'กรุณากรอก Password ทั้งสองช่องให้ตรงกัน');
-                $error = true;
-            }
-
-            if(!count(Input::post('employee_keywords'))){
-                Session::set_flash('error', 'กรุณาระบุสาขางานที่สนใจอย่างน้อย 1 อย่าง');
-                $error = true;
-            }
-
-            if(!$error) {
-
-                $employee->username = Input::post('username');
-                if(strlen(Input::post('password'))) $employee->password = Auth::instance()->hash_password(Input::post('password'));
-                $employee->email = Input::post('username');
-                $employee->group = 1;
-                $employee->employee_title = Input::post('employee_title');
-                $employee->employee_other_title = Input::post('employee_other_title');
-                $employee->employee_first_name = Input::post('employee_first_name');
-                $employee->employee_last_name = Input::post('employee_last_name');
-                $employee->employee_gender = Input::post('employee_gender');
-                $employee->employee_nationality = Input::post('employee_nationality');
-                $employee->employee_other_nationality = Input::post('employee_other_nationality');
-                $employee->employee_bdate = Input::post('employee_bdate');
-                $employee->employee_addr = Input::post('employee_addr');
-                $employee->employee_country = Input::post('employee_country');
-                $employee->employee_mobile = Input::post('employee_mobile');
-                $employee->employee_phone = Input::post('employee_phone');
-                $employee->employee_weight = Input::post('employee_weight');
-                $employee->employee_height = Input::post('employee_height');
-                $employee->employee_job_type = Input::post('employee_job_type');
-                $employee->employee_keywords = implode(",",Input::post('employee_keywords'));
-                $employee->employee_about = Input::post('employee_about');
-                $employee->employee_skills = Input::post('employee_skills');
-                $employee->created_date = Input::post('created_date');
-                $employee->last_login = Input::post('last_login');
-                $employee->login_hash = Input::post('login_hash');
-
-                if ($employee->save()) {
-                    Session::set_flash('success', 'Updated employee #' . $id);
-                    Response::redirect('employee');
-                } else {
-                    Session::set_flash('error', 'Could not update employee #' . $id);
-                }
-
-            }
-
-        } else {
-
-            if (Input::method() == 'POST') {
-
-                $employee->username = $val->validated('username');
-                $employee->employee_title = $val->validated('employee_title');
-                $employee->employee_other_title = $val->validated('employee_other_title');
-                $employee->employee_first_name = $val->validated('employee_first_name');
-                $employee->employee_last_name = $val->validated('employee_last_name');
-                $employee->employee_gender = $val->validated('employee_gender');
-                $employee->employee_nationality = $val->validated('employee_nationality');
-                $employee->employee_other_nationality = $val->validated('employee_other_nationality');
-                $employee->employee_bdate = $val->validated('employee_bdate');
-                $employee->employee_weight = $val->validated('employee_weight');
-                $employee->employee_height = $val->validated('employee_height');
-                $employee->employee_addr = $val->validated('employee_addr');
-                $employee->employee_country = $val->validated('employee_country');
-                $employee->employee_mobile = $val->validated('employee_mobile');
-                $employee->employee_phone = $val->validated('employee_phone');
-                $employee->employee_job_type = $val->validated('employee_job_type');
-                $employee->employee_keywords = implode(",",Input::post('employee_keywords'));
-                $employee->employee_about = $val->validated('employee_about');
-                $employee->employee_skills = $val->validated('employee_skills');
-
-                $msg = '<ul>';
-                foreach ($val->error() as $field => $error){
-                    $msg .= '<li>'.$error->get_message().'</li>';
-                }
-                $msg .= '</ul>';
-
-                Session::set_flash('error', $msg);
-
-            }
-
-            $this->theme->get_template()->set_global('employee', $employee, false);
-
-        }
-        $this->theme->get_template()->set_global('countries',Controller_Common::get_countries(),false);
-        $this->theme->get_template()->set_global('cats',Model_Employee::get_job_cats(),false);
-        $this->theme->get_template()->set_global('menu',"edit",false);
-        $this->theme->set_partial('left', 'employee/edit');
-    }*/
+    }
 
     public function action_delete($id = null) {
 
@@ -357,7 +165,7 @@ class Controller_Employee extends Controller_Common {
         $this->theme->get_template()->set_global('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้หางานทั้งหมดในระบบ");
         $this->theme->get_template()->set('breadcrumb', array(
             array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
-            array('title' => "Employees", 'icon' => "eicon-users", 'link' => Uri::create('employee'), 'active' => false),
+            array('title' => "Employees", 'icon' => "fa-users", 'link' => Uri::create('employee'), 'active' => false),
             array('title' => "Staff Picks", 'icon' => "fa-star", 'link' => "", 'active' => true)
         ));
 
@@ -377,25 +185,81 @@ class Controller_Employee extends Controller_Common {
 
         if(Input::method() == "POST"){
 
-            $pick = Model_EmployeePick::forge(array(
-                'employee_id' => Input::post('employee_id'),
-                'pick_date' => Input::post('pick_date'),
-                'pick_is_active' => Input::post('pick_is_active'),
-                'created_at' => time()
-            ));
+            try {
 
-            if($pick && $pick->save()){
-                Session::set_flash('success', 'Added employee #'.$id.' to Staff Picks.');
-                Response::redirect('employee/staffPicks');
-            } else {
-                Session::set_flash('error', 'Could not save employee pick.');
+                $file = Input::file('pick_photo_file');
+
+                $config = array(
+                    'path' => "/var/www/html/uploads/staffpick_cover/",
+                    'ext_whitelist' => array('jpg', 'jpeg', 'png'),
+                    'file_chmod' => 0777,
+                    'auto_rename' => true,
+                    'overwrite' => true,
+                    'randomize' => true,
+                    'create_path' => true
+                );
+
+                Upload::process($config);
+
+                if (Upload::is_valid()) {
+
+                    Upload::save();
+
+                    $pick_photo = Upload::get_files()[0];
+
+                    $pick = Model_EmployeePick::forge(array(
+                        'employee_id' => Input::post('employee_id'),
+                        'pick_type' => Input::post('pick_type'),
+                        'pick_date' => Input::post('pick_date'),
+                        'pick_photo' => $pick_photo?$pick_photo['saved_as']:"",
+                        'pick_is_active' => Input::post('pick_is_active'),
+                        'created_at' => time()
+                    ));
+
+                    if($pick && $pick->save()){
+
+                        $titles = Input::post('skill_title');
+                        $levels = Input::post('skill_level');
+
+                        foreach($titles as $key => $val){
+
+                            if(!strlen($val)) continue;
+
+                            $skill = Model_EmployeePickSkill::forge(array(
+                                'pick_id' => $pick->id,
+                                'skill_title' => $val,
+                                'skill_level' => $levels[$key],
+                                'created_at' => time()
+                            ));
+
+                            $skill->save();
+
+                        }
+
+                        Session::set_flash('success', 'Added employee #'.$id.' to Staff Picks.');
+                        Response::redirect('employee/staffPicks');
+
+                    } else {
+                        Session::set_flash('error', 'Could not save employee pick.');
+                    }
+
+                }
+
+            } catch(Exception $e){
+                die($e->getMessage());
             }
 
         }
 
         $data['employee'] = $employee;
 
+        $skills = Model_Skill::get_computer_skills($id);
+        $data['skills'] = $skills;
+
         $this->theme->set_template('edit');
+
+        $this->theme->get_template()->set_global('employee', $employee, false);
+        $this->theme->get_template()->set_global('skills', $skills, false);
 
         $this->theme->get_template()->set_global('provinces', Model_Province::get_provinces('th'));
 
@@ -403,7 +267,7 @@ class Controller_Employee extends Controller_Common {
         $this->theme->get_template()->set_global('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้หางานทั้งหมดในระบบ");
         $this->theme->get_template()->set('breadcrumb', array(
             array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
-            array('title' => "Employees", 'icon' => "eicon-users", 'link' => Uri::create('employee'), 'active' => false),
+            array('title' => "Employees", 'icon' => "fa-users", 'link' => Uri::create('employee'), 'active' => false),
             array('title' => "Add Staff Pick", 'icon' => "fa-plus", 'link' => "", 'active' => true)
         ));
 
@@ -428,6 +292,30 @@ class Controller_Employee extends Controller_Common {
         }
 
         Response::redirect('employee/staffPicks');
+
+    }
+
+    public function action_deletePortfolio($id = null) {
+
+        is_null($id) and Response::redirect('employee');
+
+        if ($portfolio = Model_Portfolio::find($id)) {
+
+            $employee_id = $portfolio->employee_id;
+
+            $portfolio->delete();
+
+            Session::set_flash('success', 'Deleted Portfolio #' . $id);
+
+            Response::redirect('employee/portfolio/'.$employee_id);
+
+        } else {
+
+            Session::set_flash('error', 'Could not delete Portfolio #' . $id);
+
+            Response::redirect('employee');
+
+        }
 
     }
 

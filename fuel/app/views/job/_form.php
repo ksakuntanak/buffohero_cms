@@ -27,7 +27,7 @@
                 <select id="province_id" data-placeholder="ระบุจังหวัด" class="col-xs-12 col-sm-12 chzn-select" name="province_id">
                     <option value=""></option>
                     <?php foreach($provinces as $id => $title){ ?>
-                        <option value="<?php echo $id; ?>"><?php echo $title; ?></option>
+                        <option value="<?php echo $id; ?>" <?php if(isset($employer) && $id == $employer->province_id) { ?>selected="selected"<?php } ?>><?php echo $title; ?></option>
                     <?php } ?>
                 </select>
             </div>

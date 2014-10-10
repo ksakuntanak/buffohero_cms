@@ -6,7 +6,9 @@ class Model_EmployeePick extends \Orm\Model {
     protected static $_properties = array(
         'id',
         'employee_id',
+        'pick_type',
         'pick_date',
+        'pick_photo',
         'pick_is_active',
         'created_at',
         'updated_at'

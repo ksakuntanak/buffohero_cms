@@ -16,10 +16,12 @@ class Controller_News extends Controller_Common {
             $data['news'] = DB::select('*')->from('news')
                 ->where('news_title','LIKE','%'.$query.'%')
                 ->limit(30)->offset(($page-1)*30)
+                ->order_by('id','desc')
                 ->execute()->as_array();
         } else {
             $data['news'] = DB::select('*')->from('news')
                 ->limit(30)->offset(($page-1)*30)
+                ->order_by('id','desc')
                 ->execute()->as_array();
         }
 
@@ -60,105 +62,148 @@ class Controller_News extends Controller_Common {
     }
 
     public function action_create() {
+        try{
+            if (Input::method() == 'POST') {
 
-        if (Input::method() == 'POST') {
+                $file = Input::file('news_photo_file');
 
-            $file = Input::file('news_photo_file');
+                $val = Model_News::validate('create');
 
-            $val = Model_News::validate('create');
+                if ($val->run()) {
 
-            if ($val->run()) {
+                    $config = array(
+                        'path' => "/var/www/html/uploads/news_photo/",
+                        'ext_whitelist' => array('jpg', 'jpeg', 'png'),
+                        'file_chmod' => 0777,
+                        'auto_rename' => true,
+                        'overwrite' => true,
+                        'randomize' => true,
+                        'create_path' => true
+                    );
+                    //  $allowList = array(".jpeg", ".jpg", ".png");
 
-                $allowList = array(".jpeg", ".jpg", ".png");
+                    //  $error = false;
 
-                $error = false;
+                    //  $path = realpath(DOCROOT."/../../uploads/news_photo/").DS;
 
-                $path = realpath(DOCROOT."/../../uploads/news_photo/").DS;
+                    $news_photo = "";
+                    Upload::process($config);
 
-                $news_photo = "";
+                    if (Upload::is_valid()) {
 
-                if($file['size'] > 0){
+                        Upload::save();
 
-                    $ext = strtolower(substr($file['name'],strrpos($file['name'],".")));
+                        $news_photo = Upload::get_files()[0];
 
-                    if(!in_array($ext,$allowList)){
-                        Session::set_flash('error', 'ชนิดของไฟล์ภาพไม่ถูกต้อง');
-                        $error = true;
+                        $news = Model_News::forge(array(
+                            'news_title' => Input::post('news_title'),
+                            'news_short_detail' => Input::post('news_short_detail'),
+                            'news_detail' => Input::post('news_detail'),
+                            'news_photo' => $news_photo['saved_as'],
+                            'news_published' => Input::post('news_published'),
+                            'created_at' => time(),
+                            'published_at' => (Input::post('news_published')==1)?time():0
+                        ));
+
+                        if ($news and $news->save()){
+                            Session::set_flash('success', 'Added news #' . $news->id . '.');
+                            Response::redirect('news/edit/'.$news->id);
+                        } else {
+                            Session::set_flash('error', 'Could not save news.');
+                        }
+
+                        if($file and $file->save())
+                        {
+                            DB::commit_transaction();
+                            \Fuel\Core\Session::set_flash('success','Upload success');
+                        }
                     }
+                    /*if($file['size'] > 0){
 
-                    $filename = md5(time());
+                        $ext = strtolower(substr($file['name'],strrpos($file['name'],".")));
 
-                    if(@copy($file['tmp_name'],$path.$filename.$ext)){
+                        if(!in_array($ext,$allowList)){
+                            Session::set_flash('error', 'ชนิดของไฟล์ภาพไม่ถูกต้อง');
+                            $error = true;
+                        }
 
-                        $news_photo = $filename.$ext;
+                        $filename = md5(time());
 
-                        /* small thumbnail */
-                        parent::create_cropped_thumbnail($path.$filename.$ext,64,64,"-s");
-                        parent::create_cropped_thumbnail($path.$filename.$ext,128,128,"-s@2x");
-                        /* */
+                        if(@copy($file['tmp_name'],$path.$filename.$ext)){
 
-                        /* medium thumbnail */
-                        parent::create_cropped_thumbnail($path.$filename.$ext,360,240,"-m");
-                        parent::create_cropped_thumbnail($path.$filename.$ext,720,480,"-m@2x");
-                        /* */
+                            $news_photo = $filename.$ext;
 
-                    } else {
-                        Session::set_flash('error', 'ไม่สามารถอัพโหลดไฟล์ภาพได้ โปรดลองใหม่อีกครั้ง');
-                        $error = true;
-                    }
+                            /* small thumbnail */
+                    #   parent::create_cropped_thumbnail($path.$filename.$ext,64,64,"-s");
+                    #   parent::create_cropped_thumbnail($path.$filename.$ext,128,128,"-s@2x");
+                    /* */
 
+                    /* medium thumbnail */
+                    #  parent::create_cropped_thumbnail($path.$filename.$ext,360,240,"-m");
+                    #  parent::create_cropped_thumbnail($path.$filename.$ext,720,480,"-m@2x");
+                    /*
+
+                } else {
+                    Session::set_flash('error', 'ไม่สามารถอัพโหลดไฟล์ภาพได้ โปรดลองใหม่อีกครั้ง');
+                    $error = true;
                 }
 
-                if(!$error){
+            }*/
 
-                    $news = Model_News::forge(array(
-                        'news_title' => Input::post('news_title'),
-                        'news_short_detail' => Input::post('news_short_detail'),
-                        'news_detail' => Input::post('news_detail'),
-                        'news_photo' => $news_photo,
-                        'news_published' => Input::post('news_published'),
-                        'created_at' => time(),
-                        'published_at' => (Input::post('news_published')==1)?time():0
-                    ));
+                    /*if(!$error){
 
-                    if ($news and $news->save()){
-                        Session::set_flash('success', 'Added news #' . $news->id . '.');
-                        Response::redirect('news/edit/'.$news->id);
-                    } else {
-                        Session::set_flash('error', 'Could not save news.');
+                        $news = Model_News::forge(array(
+                            'news_title' => Input::post('news_title'),
+                            'news_short_detail' => Input::post('news_short_detail'),
+                            'news_detail' => Input::post('news_detail'),
+                            'news_photo' => $news_photo,
+                            'news_published' => Input::post('news_published'),
+                            'created_at' => time(),
+                            'published_at' => (Input::post('news_published')==1)?time():0
+                        ));
+
+                        if ($news and $news->save()){
+                            Session::set_flash('success', 'Added news #' . $news->id . '.');
+                            Response::redirect('news/edit/'.$news->id);
+                        } else {
+                            Session::set_flash('error', 'Could not save news.');
+                        }
+
+                    }*/
+
+                } else {
+                    $msg = '<ul>';
+                    foreach ($val->error() as $field => $error){
+                        $msg .= '<li>'.$error->get_message().'</li>';
                     }
-
+                    $msg .= '</ul>';
+                    Session::set_flash('error', $msg);
                 }
 
-            } else {
-                $msg = '<ul>';
-                foreach ($val->error() as $field => $error){
-                    $msg .= '<li>'.$error->get_message().'</li>';
-                }
-                $msg .= '</ul>';
-                Session::set_flash('error', $msg);
             }
 
+            $this->theme->set_template('edit');
+
+            $this->theme->get_template()->set_global('current_menu', "News", false);
+            $this->theme->get_template()->set_global('current_menu_desc', "จัดการข่าวทั้งหมดในระบบ", false);
+
+            $this->theme->get_template()->set('breadcrumb', array(
+                array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
+                array('title' => "News", 'icon' => "eicon-newspaper", 'link' => Uri::create('news/index'), 'active' => false),
+                array('title' => "Create", 'icon' => "", 'link' => "", 'active' => true)
+            ));
+
+            $this->theme->get_template()->set_global('mode', "create", false);
+
+            $this->theme->get_template()->set('page_specific_js', "form_news.js");
+
+            $this->theme->set_partial('sidebar','common/sidebar');
+
+            $this->theme->set_partial('left', 'news/create');
+
+        }catch (Exception $e){
+            die($e->getMessage());
         }
-
-        $this->theme->set_template('edit');
-
-        $this->theme->get_template()->set_global('current_menu', "News", false);
-        $this->theme->get_template()->set_global('current_menu_desc', "จัดการข่าวทั้งหมดในระบบ", false);
-
-        $this->theme->get_template()->set('breadcrumb', array(
-            array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
-            array('title' => "News", 'icon' => "eicon-newspaper", 'link' => Uri::create('news/index'), 'active' => false),
-            array('title' => "Create", 'icon' => "", 'link' => "", 'active' => true)
-        ));
-
-        $this->theme->get_template()->set_global('mode', "create", false);
-
-        $this->theme->get_template()->set('page_specific_js', "form_news.js");
-
-        $this->theme->set_partial('sidebar','common/sidebar');
-
-        $this->theme->set_partial('left', 'news/create');
 
     }
 

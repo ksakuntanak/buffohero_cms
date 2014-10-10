@@ -11,7 +11,8 @@ class Controller_Common extends Controller_Template {
 
         } else {
 
-            $user_id = Session::get('cms_user_id');
+
+            $user_id = \Auth\Auth::instance()->get_user_id()[1];
 
             /*($user_id);
             exit();*/
@@ -21,6 +22,7 @@ class Controller_Common extends Controller_Template {
                 $user = Model_User::find($user_id);
 
                 if(!$user || $user->group != 100){
+
                     Response::redirect('/user/login');
                 }
 
