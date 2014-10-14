@@ -297,6 +297,8 @@ class Controller_Employee extends Controller_Common {
 
     public function action_deletePortfolio($id = null) {
 
+        try {
+
         is_null($id) and Response::redirect('employee');
 
         if ($portfolio = Model_Portfolio::find($id)) {
@@ -315,6 +317,10 @@ class Controller_Employee extends Controller_Common {
 
             Response::redirect('employee');
 
+        }
+
+        } catch(Exception $e){
+            die($e->getMessage());
         }
 
     }

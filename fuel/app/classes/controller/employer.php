@@ -7,22 +7,25 @@ class Controller_Employer extends Controller_Common {
         $this->theme = \Theme::instance();
     }
 
-    public function action_index($page = 1, $query = "") {
+    public function action_index() {
 
-        if (strlen($query)) {
-            $data['employers'] = DB::select('*')->from('employers')->where('employer_name','LIKE','%'.$query.'%')->execute()->as_array();
-        } else {
-            $data['employers'] = DB::select('*')->from('employers')->execute()->as_array();
-        }
+        try {
+
+        $page = Input::get('page')?Input::get('page'):1;
+
+        $data['employers'] = Model_Employer::get_employers($page);
 
         $data['page'] = $page;
+        $data['total_page'] = ceil($data['employers']['total']/30);
 
         $config = array(
-            'pagination_url' => Uri::create('employer/index/'),
-            'total_items'    => Model_Employer::count(),
-            'per_page'       => 30,
-            'uri_segment'    => 4
+            'pagination_url' => "",
+            'total_items' => $data['employers']['total'],
+            'per_page' => 30,
+            'uri_segment' => 2,
+            'current_page' => $page
         );
+
         $pagination = Pagination::forge('pagenav',$config);
         $data['pagination'] = $pagination->render();
 
@@ -31,11 +34,18 @@ class Controller_Employer extends Controller_Common {
         $this->theme->get_template()->set('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้ว่าจ้างทั้งหมดในระบบ");
         $this->theme->get_template()->set('breadcrumb', array(
             array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
-            array('title' => "Employers", 'icon' => "eicon-vcard", 'link' => "", 'active' => true)
+            array('title' => "Employers", 'icon' => "fa-building", 'link' => "", 'active' => true)
         ));
-        $this->theme->get_template()->set_global('query',$query,false);
 
+        // $this->theme->get_template()->set_global('query',$query,false);
+
+        $this->theme->set_partial('sidebar','common/sidebar');
         $this->theme->set_partial('content', 'employer/index')->set($data);
+
+        } catch(Exception $e){
+            die($e->getMessage());
+        }
+
     }
 
     public function action_view($id = null) {
@@ -294,14 +304,38 @@ class Controller_Employer extends Controller_Common {
     }
 
     public function action_delete($id = null) {
+
+        try {
+
         is_null($id) and Response::redirect('employer');
+
         if ($employer = Model_Employer::find($id)) {
+
+            $user = Model_User::find($employer->user_id);
+
+            // delete all user's record
+            DB::query("DELETE FROM buff_resume_views WHERE employer_id = ".$id)->execute();
+
+            DB::query("DELETE FROM buff_jobs WHERE employer_id = ".$id)->execute();
+
+            // delete user
+            $user->delete();
+
+            // delete employer
             $employer->delete();
+
             Session::set_flash('success', 'Deleted employer #' . $id);
+
         } else {
             Session::set_flash('error', 'Could not delete employer #' . $id);
         }
+
         Response::redirect('employer');
+
+        } catch(Exception $e){
+            die($e->getMessage());
+        }
+
     }
 
     public function after($response) {
