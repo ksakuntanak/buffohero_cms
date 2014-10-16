@@ -83,9 +83,9 @@ class Controller_Job extends Controller_Common {
 
             $val = Model_Job::validate('create');
 
-            $val->add_field('employer_name', 'Employer Name', 'required|max_length[255]');
+            /*$val->add_field('employer_name', 'Employer Name', 'required|max_length[255]');
             $val->add_field('employer_tel', 'Employer Tel', 'required');
-            $val->add_field('employer_email', 'Employer E-Mail', 'required|valid_email');
+            $val->add_field('employer_email', 'Employer E-Mail', 'required|valid_email');*/
 
             if(Input::post('job_type') == "fulltime"){
                 $val->add_field('job_title_fulltime', 'Job Title', 'required|max_length[255]');
@@ -99,17 +99,17 @@ class Controller_Job extends Controller_Common {
                 $val->add_field('job_prize', 'Prize', 'required|max_length[255]');
             }
 
-            $employer_id = 0;
+            // $employer_id = 0;
 
             if ($val->run()) {
 
                 $error = false;
 
-                $employer_photo = "";
+                // $employer_photo = "";
                 $job_attachment = "";
 
                 /* upload employer logo */
-                $file = Input::file('employer_photo_file');
+                /*$file = Input::file('employer_photo_file');
 
                 $allowList = array(".jpeg", ".jpg", ".png");
 
@@ -133,7 +133,7 @@ class Controller_Job extends Controller_Common {
                         $error = true;
                     }
 
-                }
+                }*/
                 /* */
 
                 /* upload job attachment */
@@ -176,7 +176,7 @@ class Controller_Job extends Controller_Common {
 
                 if(!$error){
 
-                    $old_employer = DB::select('*')->from('employers')
+                    /*$old_employer = DB::select('*')->from('employers')
                         ->where('employer_name','=',Input::post('employer_name'))
                         ->execute()->as_array();
 
@@ -204,10 +204,10 @@ class Controller_Job extends Controller_Common {
                             $employer_id = $employer->id;
                         }
 
-                    }
+                    }*/
 
                     $config = array(
-                        'employer_id' => $employer_id,
+                        'employer_id' => Input::post('employer_id'),
                         'job_desc' => Input::post('job_desc'),
                         'job_type' => Input::post('job_type'),
                         'cat_id' => Input::post('cat_id'),
@@ -276,6 +276,7 @@ class Controller_Job extends Controller_Common {
         $this->theme->get_template()->set_global('current_subcats', array(), false);
 
         $this->theme->get_template()->set_global('provinces', Model_Province::get_provinces("th"), false);
+        $this->theme->get_template()->set_global('employers', Model_Employer::get_employers_for_dropdown(), false);
 
         $this->theme->get_template()->set_global('page_specific_js', "form_job.js", false);
 
@@ -286,6 +287,8 @@ class Controller_Job extends Controller_Common {
     }
 
     public function action_edit($id = null) {
+
+        try {
 
         is_null($id) and Response::redirect('job');
 
@@ -304,15 +307,15 @@ class Controller_Job extends Controller_Common {
             Response::redirect('job');
         }
 
-        $employer = Model_Employer::find($job->employer_id);
+        // $employer = Model_Employer::find($job->employer_id);
 
         if(Input::method() == 'POST') {
 
             $val = Model_Job::validate('edit');
 
-            $val->add_field('employer_name', 'Employer Name', 'required|max_length[255]');
+            /*$val->add_field('employer_name', 'Employer Name', 'required|max_length[255]');
             $val->add_field('employer_tel', 'Employer Tel', 'required');
-            $val->add_field('employer_email', 'Employer E-Mail', 'required|valid_email');
+            $val->add_field('employer_email', 'Employer E-Mail', 'required|valid_email');*/
 
             if(Input::post('job_type') == "fulltime"){
                 $val->add_field('job_title_fulltime', 'Job Title', 'required|max_length[255]');
@@ -330,11 +333,11 @@ class Controller_Job extends Controller_Common {
 
                 $error = false;
 
-                $employer_photo = "";
+                // $employer_photo = "";
                 $job_attachment = "";
 
                 /* upload employer logo */
-                $file = Input::file('employer_photo_file');
+                /* $file = Input::file('employer_photo_file');
 
                 $allowList = array(".jpeg", ".jpg", ".png");
 
@@ -352,26 +355,18 @@ class Controller_Job extends Controller_Common {
                     $filename = md5(time());
 
                     if(@copy($file['tmp_name'],$path.$filename."-o".$ext)){
-
                         $employer_photo = $filename.$ext;
-
-                        /* retina */
                         parent::create_cropped_thumbnail($path.$filename."-o".$ext, 466, 360,"@2x");
-                        /* */
-
-                        /* normal */
                         parent::create_cropped_thumbnail($path.$filename."-o".$ext, 466, 360);
-                        /* */
-
                     } else {
                         Session::set_flash('error', 'ไม่สามารถอัพโหลดไฟล์ภาพได้ โปรดลองใหม่อีกครั้ง');
                         $error = true;
                     }
 
-                }
+                } */
                 /* */
 
-                if(strlen($employer_photo) && strlen($employer->employer_photo)){
+                /*if(strlen($employer_photo) && strlen($employer->employer_photo)){
 
                     $old_ext = strtolower(substr($employer->employer_photo,strrpos($employer->employer_photo,".")));
 
@@ -381,7 +376,7 @@ class Controller_Job extends Controller_Common {
                     @unlink($path.$old_filename."@2x".$old_ext);
                     @unlink($path.$old_filename."-o".$old_ext);
 
-                }
+                }*/
 
                 /* upload job attachment */
                 $file = Input::file('job_attachment_file');
@@ -413,7 +408,7 @@ class Controller_Job extends Controller_Common {
 
                 if(!$error){
 
-                    $employer->province_id = Input::post('province_id');
+                    /*$employer->province_id = Input::post('province_id');
                     $employer->employer_name = Input::post('employer_name');
                     $employer->employer_desc = Input::post('employer_desc');
                     $employer->employer_addr = Input::post('employer_addr');
@@ -423,8 +418,9 @@ class Controller_Job extends Controller_Common {
                     $employer->employer_website = Input::post('employer_website');
                     if(strlen($employer_photo)) $employer->employer_photo = $employer_photo;
 
-                    $employer->save();
+                    $employer->save();*/
 
+                    $job->employer_id = Input::post('employer_id');
                     $job->job_desc = Input::post('job_desc');
                     $job->job_type = Input::post('job_type');
                     $job->cat_id = Input::post('cat_id');
@@ -476,7 +472,7 @@ class Controller_Job extends Controller_Common {
         }
 
         $this->theme->get_template()->set_global('job', $job, false);
-        $this->theme->get_template()->set_global('employer', $employer, false);
+        // $this->theme->get_template()->set_global('employer', $employer, false);
 
         $this->theme->get_template()->set_global('cats', Model_Category::get_categories(), false);
         $this->theme->get_template()->set_global('subcats', json_encode(Model_Subcategory::get_all_subcats()), false);
@@ -486,12 +482,17 @@ class Controller_Job extends Controller_Common {
         $this->theme->get_template()->set_global('current_subcats', $current_subcats, false);
 
         $this->theme->get_template()->set_global('provinces', Model_Province::get_provinces("th"), false);
+        $this->theme->get_template()->set_global('employers', Model_Employer::get_employers_for_dropdown(), false);
 
         $this->theme->get_template()->set_global('page_specific_js', "form_job.js", false);
 
         $this->theme->set_partial('sidebar','common/sidebar');
 
         $this->theme->set_partial('left', 'job/edit');
+
+        } catch(Exception $e){
+            die($e->getMessage());
+        }
 
     }
 

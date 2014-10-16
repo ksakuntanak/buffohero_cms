@@ -12,7 +12,7 @@
             <a href="<?php echo Uri::create('user'); ?>"><i class="fa fa-users"></i> <span class="name">Users</span></a>
         </li>
         <li class="<?php if($controller == 'employer') { ?>active<?php } else { ?>panel<?php } ?>">
-            <a href="<?php echo Uri::create('employer'); ?>"><i class="fa fa-building"></i> <span class="name">Employers</span></a>
+            <a href="<?php echo Uri::create('employer'); ?>"><i class="fa fa-building-o"></i> <span class="name">Employers</span></a>
         </li>
         <li class="<?php if($controller == 'employee') { ?>active<?php } else { ?>panel<?php } ?>">
             <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#side-nav" href="#employee-collapse">

@@ -33,4 +33,20 @@ class Model_User extends \Orm\Model
         return $val;
     }
 
+    public static function get_user_by_email($email){
+
+        if(!strlen($email)) return null;
+
+        $query = DB::select('*')->from('users')
+            ->where('username','=',$email)
+            ->or_where('email','=',$email)
+            ->order_by('created_at','desc')
+            ->limit(1)->offset(0)
+            ->execute()->as_array();
+
+        if(count($query)) return Model_User::find($query[0]['id']);
+        else return null;
+
+    }
+
 }

@@ -1,7 +1,7 @@
 <div class="body">
     <?php echo Form::open(array("class" => "form-horizontal","enctype" => "multipart/form-data")); ?>
     <?php echo Form::fieldset_open(); ?>
-        <legend class="section">ข้อมูลผู้ว่าจ้าง</legend>
+        <!--legend class="section">ข้อมูลผู้ว่าจ้าง</legend>
         <div class="form-group" id="employer-name">
             <?php echo Form::label('ชื่อผู้ว่าจ้าง <span class="required">*</span>', 'employer_name', array('class' => 'control-label')); ?>
             <div class="controls form-group">
@@ -72,7 +72,20 @@
                 </div>
             </div>
         </div>
-        <legend class="section">ข้อมูลงาน</legend>
+        <legend class="section">ข้อมูลงาน</legend-->
+        <div class="form-group" id="job-employer-id">
+            <?php echo Form::label('ผู้จ้างงาน <span class="required">*</span>', 'employer_id', array('class' => 'control-label')); ?>
+            <div class="controls form-group">
+                <select id="employer_id" data-placeholder="ระบุผู้จ้างงาน" class="col-xs-12 col-sm-12 chzn-select" name="employer_id">
+                    <option value=""></option>
+                    <?php if(count($employers)) { ?>
+                        <?php foreach($employers as $id => $title){ ?>
+                            <option value="<?php echo $id; ?>" <?php if(isset($job) && $id == $job->employer_id) { ?>selected="selected"<?php } ?>><?php echo $title; ?></option>
+                        <?php } ?>
+                    <?php } ?>
+                </select>
+            </div>
+        </div>
         <div class="form-group" id="job-type">
             <?php echo Form::label('ประเภทงาน <span class="required">*</span>', 'job_type', array('class' => 'control-label')); ?>
             <div class="controls form-group">

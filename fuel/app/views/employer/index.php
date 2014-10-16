@@ -34,13 +34,13 @@
         <?php endforeach; ?>
         </tbody>
     </table>
-
 <?php } else { ?>
     <p>ยังไม่มีผู้ใช้งานประเภทผู้จ้างงานในระบบ</p>
 <?php } ?>
 <div class="clearfix">
     <?php echo html_entity_decode($pagination); ?>
 </div>
+    <?php echo Html::anchor('employer/create', '<i class="fa eicon-user-add"></i> เพิ่มผู้จ้างงานใหม่', array('class' => 'btn btn-success')); ?>
 <script type="text/javascript">
 
     var page = <?php echo $page; ?>;

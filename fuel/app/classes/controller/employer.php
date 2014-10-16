@@ -34,7 +34,7 @@ class Controller_Employer extends Controller_Common {
         $this->theme->get_template()->set('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้ว่าจ้างทั้งหมดในระบบ");
         $this->theme->get_template()->set('breadcrumb', array(
             array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
-            array('title' => "Employers", 'icon' => "fa-building", 'link' => "", 'active' => true)
+            array('title' => "Employers", 'icon' => "fa-building-o", 'link' => "", 'active' => true)
         ));
 
         // $this->theme->get_template()->set_global('query',$query,false);
@@ -48,40 +48,49 @@ class Controller_Employer extends Controller_Common {
 
     }
 
-    public function action_view($id = null) {
-        is_null($id) and Response::redirect('employer');
-
-        if (!$data['employer'] = Model_Employer::find($id)) {
-            Session::set_flash('error', 'Could not find employer #' . $id);
-            Response::redirect('employer');
-        }
-
-        $this->template->title = "Employer";
-        $this->template->content = View::forge('employer/view', $data);
-    }
-
     public function action_create() {
 
-        if (Input::method() == 'POST') {
+        try {
 
-            $file = Input::file('employer_logo');
+        if(Input::method() == 'POST'){
 
-            $val = Model_Employer::validate('create');
+
+            $val = Model_Employer::validate('edit');
 
             $val->add_field('password', 'Password', 'required|min_length[8]|max_length[20]');
             $val->add_field('password_re', 'Re-type Password', 'required|min_length[8]|max_length[20]');
+
+            $file = Input::file('employer_photo_file');
 
             $error = false;
 
             if ($val->run()) {
 
-                $allowList = array(".gif", ".jpeg", ".jpg", ".png");
+                $employer_photo = "";
 
-                $ext = substr($file['name'],strrpos($file['name'],"."));
+                if($file['size'] > 0){
 
-                if(!in_array($ext,$allowList)){
-                    Session::set_flash('error', 'ชนิดของไฟล์ภาพไม่ถูกต้อง');
-                    $error = true;
+                    $allowList = array(".gif", ".jpeg", ".jpg", ".png");
+
+                    $ext = substr($file['name'],strrpos($file['name'],"."));
+
+                    if(!in_array($ext,$allowList)){
+                        Session::set_flash('error', 'ชนิดของไฟล์ภาพไม่ถูกต้อง');
+                        $error = true;
+                    }
+
+                    $path = realpath(DOCROOT."/../../uploads/profile_photo/employer/").DS;
+
+                    $filename = md5($file['name']).$ext;
+
+                    if(strlen(Input::post('employer_photo_file'))){
+                        @unlink($path.Input::post('employer_photo_file'));
+                    }
+
+                    if(@copy($file['tmp_name'],$path.$filename)){
+                        $employer_photo = $filename;
+                    }
+
                 }
 
                 if(strlen(Input::post('password')) && Input::post('password') != Input::post('password_re')){
@@ -91,197 +100,201 @@ class Controller_Employer extends Controller_Common {
 
                 if(!$error) {
 
-                    $path = DOCROOT.'uploads'.DS;
+                    $user = Model_User::get_user_by_email(Input::post('username'));
 
-                    $filename = md5($file['name']).$ext;
+                    if(!$user){
 
-                    $employer_logo_file = "";
+                        $user = Model_User::forge(array(
+                            'username' => Input::post('username'),
+                            'password' => Auth::instance()->hash_password(Input::post('password')),
+                            'email' => Input::post('username'),
+                            'group' => 1,
+                            'profile_fields' => "",
+                            'last_login' => 0,
+                            'login_hash' => "",
+                            'created_at' => time()
+                        ));
 
-                    if(@copy($file['tmp_name'],$path.$filename)){
-                        $employer_logo_file = $filename;
-                    } else {
-                        $employer_logo_file = "";
+                        $user->save();
+
                     }
 
-                    /*$config = array(
-                        'path' => DOCROOT.DS.'uploads',
-                        'randomize' => true,
-                        'ext_whitelist' => array('img', 'jpg', 'jpeg', 'gif', 'png'),
-                    );
-
-                    Upload::process($config);
-
-                    // if a valid file is passed than the function will save, or if its not empty
-                    if (Upload::is_valid()){
-                        Upload::save();
-                        $value = Upload::get_files();
-                        $employer_logo_file = $value[0]['saved_as'];
-                    } else {
-                        $employer_logo_file = "";
-                    }*/
-
-                    $created_date = date('Y-m-d H:i:s');
-
                     $employer = Model_Employer::forge(array(
-                        'username' => Input::post('username'),
-                        'password' => Auth::instance()->hash_password(Input::post('password')),
-                        'email' => Input::post('employer_email'),
+                        'user_id' => $user->id,
                         'employer_name' => Input::post('employer_name'),
                         'employer_desc' => Input::post('employer_desc'),
                         'employer_addr' => Input::post('employer_addr'),
+                        'province_id' => Input::post('province_id'),
                         'employer_tel' => Input::post('employer_tel'),
                         'employer_fax' => Input::post('employer_fax'),
                         'employer_email' => Input::post('employer_email'),
                         'employer_website' => Input::post('employer_website'),
-                        'employer_logo_file' => $employer_logo_file,
-                        'created_date' => $created_date,
-                        'last_login' => Input::post('last_login'),
-                        'login_hash' => Input::post('login_hash')
+                        'employer_photo' => $employer_photo,
+                        'employer_is_active' => 1,
+                        'created_at' => time()
                     ));
 
-                    if ($employer and $employer->save()){
-                        Session::set_flash('success', 'Added employer #' . $employer->id . '.');
+                    if ($employer->save()) {
+                        Session::set_flash('success', 'Updated employer #'.$employer->id);
                         Response::redirect('employer');
                     } else {
-                        Session::set_flash('error', 'Could not save employer.');
+                        Session::set_flash('error', 'Could not update employer #'.$employer->id);
                     }
 
                 }
 
             } else {
+
+                /*$employer->username = $val->validated('username');
+                $employer->employer_name = $val->validated('employer_name');
+                $employer->employer_desc = $val->validated('employer_desc');
+                $employer->employer_addr = $val->validated('employer_addr');
+                $employer->employer_tel = $val->validated('employer_tel');
+                $employer->employer_fax = $val->validated('employer_fax');
+                $employer->employer_email = $val->validated('employer_email');
+                $employer->employer_website = $val->validated('employer_website');*/
+
                 $msg = '<ul>';
+
                 foreach ($val->error() as $field => $error){
                     $msg .= '<li>'.$error->get_message().'</li>';
                 }
+
                 $msg .= '</ul>';
+
                 Session::set_flash('error', $msg);
+
             }
+
         }
+
         $this->theme->set_template('edit');
+
         $this->theme->get_template()->set('current_menu', "Employers");
         $this->theme->get_template()->set('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้ว่าจ้างทั้งหมดในระบบ");
+
         $this->theme->get_template()->set('breadcrumb', array(
             array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
-            array('title' => "Employers", 'icon' => "eicon-vcard", 'link' => Uri::create('employer/index'), 'active' => false),
+            array('title' => "Employers", 'icon' => "fa-building-o", 'link' => Uri::create('employer/index'), 'active' => false),
             array('title' => "Create", 'icon' => "", 'link' => "", 'active' => true)
         ));
+
         $this->theme->get_template()->set_global('menu',"create",false);
+
+        $this->theme->set_partial('sidebar','common/sidebar');
         $this->theme->set_partial('left', 'employer/create');
+
+        $this->theme->get_template()->set_global('provinces', Model_Province::get_provinces("th"), false);
+
+        } catch(Exception $e){
+            die($e->getMessage());
+        }
+
     }
 
     public function action_edit($id = null) {
+
         is_null($id) and Response::redirect('employer');
 
-        $this->theme->set_template('edit');
-        $this->theme->get_template()->set('current_menu', "Employers");
-        $this->theme->get_template()->set('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้ว่าจ้างทั้งหมดในระบบ");
-        $this->theme->get_template()->set('breadcrumb', array(
-            array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
-            array('title' => "Employers", 'icon' => "eicon-vcard", 'link' => Uri::create('employer/index'), 'active' => false),
-            array('title' => "Edit", 'icon' => "", 'link' => "", 'active' => true)
-        ));
+        $employer = Model_Employer::find($id);
 
-        if (!$employer = Model_Employer::find($id)) {
-            Session::set_flash('error', 'Could not find employer #' . $id);
+        if (!$employer) {
+            Session::set_flash('error', 'Could not find employer #'.$id);
             Response::redirect('employer');
         }
 
-        $val = Model_Employer::validate('edit');
+        if($employer->user_id)
+            $user = Model_User::find($employer->user_id);
+        else
+            $user = null;
 
-        if(strlen(Input::post('password'))){
-            $val->add_field('password', 'Password', 'required|min_length[8]|max_length[20]');
-            $val->add_field('password_re', 'Re-type Password', 'required|min_length[8]|max_length[20]');
-        }
+        if(Input::method() == 'POST'){
 
-        $file = Input::file('employer_logo');
+            //print_r(Input::post()); exit();
 
-        $error = false;
+            $val = Model_Employer::validate('edit');
 
-        if ($val->run()) {
-
-            if(strlen($file['name'])){
-
-                $allowList = array(".gif", ".jpeg", ".jpg", ".png");
-
-                $ext = substr($file['name'],strrpos($file['name'],"."));
-
-                if(!in_array($ext,$allowList)){
-                    Session::set_flash('error', 'ชนิดของไฟล์ภาพไม่ถูกต้อง');
-                    $error = true;
-                }
-
+            if($user && strlen(Input::post('password'))){
+                $val->add_field('password', 'Password', 'required|min_length[8]|max_length[20]');
+                $val->add_field('password_re', 'Re-type Password', 'required|min_length[8]|max_length[20]');
             }
 
-            if(strlen(Input::post('password')) && Input::post('password') != Input::post('password_re')){
-                Session::set_flash('error', 'กรุณากรอก Password ทั้งสองช่องให้ตรงกัน');
-                $error = true;
-            }
+            $file = Input::file('employer_photo_file');
 
-            if(!$error) {
+            $error = false;
 
-                $employer_logo_file = Input::post('employer_logo_file');
+            if ($val->run()) {
 
-                if(strlen($file['name'])){
+                $employer_photo = "";
 
-                    $path = DOCROOT.'uploads'.DS;
+                if($file['size'] > 0){
+
+                    $allowList = array(".gif", ".jpeg", ".jpg", ".png");
+
+                    $ext = substr($file['name'],strrpos($file['name'],"."));
+
+                    if(!in_array($ext,$allowList)){
+                        Session::set_flash('error', 'ชนิดของไฟล์ภาพไม่ถูกต้อง');
+                        $error = true;
+                    }
+
+                    $path = realpath(DOCROOT."/../../uploads/profile_photo/employer/").DS;
 
                     $filename = md5($file['name']).$ext;
 
-                    if(strlen(Input::post('employer_logo_file'))){
-                        @unlink($path.Input::post('employer_logo_file'));
+                    if(strlen(Input::post('employer_photo_file'))){
+                        @unlink($path.Input::post('employer_photo_file'));
                     }
 
                     if(@copy($file['tmp_name'],$path.$filename)){
-                        $employer_logo_file = $filename;
+                        $employer_photo = $filename;
                     }
 
                 }
 
-                /*$config = array(
-                    'path' => DOCROOT.DS.'uploads',
-                    'randomize' => true,
-                    'ext_whitelist' => array('img', 'jpg', 'jpeg', 'gif', 'png'),
-                );
-
-                $upload = \Fuel\Core\Upload::instance();
-
-                $upload->process($config);
-
-                // if a valid file is passed than the function will save, or if its not empty
-                if ($upload->is_valid()){
-                    $upload->save();
-                    $value = $upload->get_files();
-                    $employer_logo_file = $value[0]['saved_as'];
-                } else {
-                    $employer_logo_file = "";
-                }*/
-
-                $employer->username = Input::post('username');
-                if(strlen(Input::post('password'))) $employer->password = Auth::instance()->hash_password(Input::post('password'));
-                $employer->email = Input::post('employer_email');
-                $employer->employer_name = Input::post('employer_name');
-                $employer->employer_desc = Input::post('employer_desc');
-                $employer->employer_addr = Input::post('employer_addr');
-                $employer->employer_tel = Input::post('employer_tel');
-                $employer->employer_fax = Input::post('employer_fax');
-                $employer->employer_email = Input::post('employer_email');
-                $employer->employer_website = Input::post('employer_website');
-                $employer->employer_logo_file = $employer_logo_file;
-                $employer->created_date = Input::post('created_date');
-                $employer->last_login = Input::post('last_login');
-                $employer->login_hash = Input::post('login_hash');
-
-                if ($employer->save()) {
-                    Session::set_flash('success', 'Updated employer #' . $id);
-                    Response::redirect('employer');
-                } else {
-                    Session::set_flash('error', 'Could not update employer #' . $id);
+                if(strlen(Input::post('password')) && Input::post('password') != Input::post('password_re')){
+                    Session::set_flash('error', 'กรุณากรอก Password ทั้งสองช่องให้ตรงกัน');
+                    $error = true;
                 }
 
-            }
+                if(!$error) {
 
-        } else {
-            if (Input::method() == 'POST') {
+                    if($user){
+
+                        if(strlen(Input::post('password')))
+                            $user->password = Auth::instance()->hash_password(Input::post('password'));
+
+                        $user->save();
+
+                    }
+
+                    $employer->employer_name = Input::post('employer_name');
+                    $employer->employer_desc = Input::post('employer_desc');
+                    $employer->employer_addr = Input::post('employer_addr');
+                    $employer->province_id = Input::post('province_id');
+                    $employer->employer_tel = Input::post('employer_tel');
+                    $employer->employer_fax = Input::post('employer_fax');
+                    $employer->employer_email = Input::post('employer_email');
+                    $employer->employer_website = Input::post('employer_website');
+                    $employer->employer_is_active = Input::post('employer_is_active');
+
+                    if(strlen($employer_photo)) $employer->employer_photo = $employer_photo;
+
+                    if ($employer->save()) {
+
+                        Session::set_flash('success', 'Updated employer #' . $id);
+                        Response::redirect('employer');
+
+                    } else {
+
+                        Session::set_flash('error', 'Could not update employer #' . $id);
+
+                    }
+
+                }
+
+            } else {
+
                 $employer->username = $val->validated('username');
                 $employer->employer_name = $val->validated('employer_name');
                 $employer->employer_desc = $val->validated('employer_desc');
@@ -290,17 +303,42 @@ class Controller_Employer extends Controller_Common {
                 $employer->employer_fax = $val->validated('employer_fax');
                 $employer->employer_email = $val->validated('employer_email');
                 $employer->employer_website = $val->validated('employer_website');
+
                 $msg = '<ul>';
+
                 foreach ($val->error() as $field => $error){
                     $msg .= '<li>'.$error->get_message().'</li>';
                 }
+
                 $msg .= '</ul>';
+
                 Session::set_flash('error', $msg);
+
             }
-            $this->theme->get_template()->set_global('employer', $employer, false);
+
         }
+
+        $this->theme->set_template('edit');
+
+        $this->theme->get_template()->set_global('employer', $employer, false);
+        $this->theme->get_template()->set_global('user', $user, false);
+
+        $this->theme->get_template()->set('current_menu', "Employers");
+        $this->theme->get_template()->set('current_menu_desc', "จัดการผู้ใช้งานที่เป็นผู้ว่าจ้างทั้งหมดในระบบ");
+
+        $this->theme->get_template()->set('breadcrumb', array(
+            array('title' => "Home", 'icon' => "fa-home", 'link' => Uri::create('home'), 'active' => false),
+            array('title' => "Employers", 'icon' => "fa-building-o", 'link' => Uri::create('employer/index'), 'active' => false),
+            array('title' => "Edit", 'icon' => "", 'link' => "", 'active' => true)
+        ));
+
         $this->theme->get_template()->set_global('menu',"edit",false);
+
+        $this->theme->set_partial('sidebar','common/sidebar');
         $this->theme->set_partial('left', 'employer/edit');
+
+        $this->theme->get_template()->set_global('provinces', Model_Province::get_provinces("th"), false);
+
     }
 
     public function action_delete($id = null) {
