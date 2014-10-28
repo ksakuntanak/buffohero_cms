@@ -51,26 +51,22 @@ class Model_Employee extends Model {
     );
 
     public static function validate($factory) {
+
         $val = Validation::forge($factory);
-        $val->add_field('username', 'Username', 'required|max_length[255]|valid_email');
-        $val->add_field('employee_title', 'คำนำหน้า', 'required');
-        $val->add_field('employee_other_title', 'คำนำหน้าอื่นๆ', 'min_length[1]|max_length[255]');
-        $val->add_field('employee_first_name', 'ชื่อ', 'required|max_length[255]');
-        $val->add_field('employee_last_name', 'นามสกุล', 'required|max_length[255]');
+
+        $val->add_field('username', 'Username', 'required|max_length[255]');
+        $val->add_field('employee_display_name', 'ชื่อโปรไฟล์', 'required|max_length[255]');
+        $val->add_field('employee_firstname', 'ชื่อ', 'required|max_length[255]');
+        $val->add_field('employee_lastname', 'นามสกุล', 'required|max_length[255]');
         $val->add_field('employee_gender', 'เพศ', 'required');
-        $val->add_field('employee_nationality', 'สัญชาติ', 'required');
-        $val->add_field('employee_other_nationality', 'สัญชาติอื่นๆ', 'min_length[1]|max_length[255]');
-        $val->add_field('employee_bdate', 'วันเดือนปีเกิด', 'required');
-        $val->add_field('employee_addr', 'ที่อยู่', 'required');
-        $val->add_field('employee_country', 'ประเทศ', 'required');
-        $val->add_field('employee_mobile', 'หมายเลขโทรศัพท์มือถือ', 'required|max_length[255]');
-        $val->add_field('employee_phone', 'หมายเลขโทรศัพท์บ้าน', 'min_length[1]|max_length[255]');
-        $val->add_field('employee_job_type', 'ประเภทงานที่สนใจ', 'required');
-        $val->add_field('employee_keywords', 'สาขางานที่สนใจ', 'required');
-        $val->add_field('employee_about', 'เกี่ยวกับผู้หางาน', 'required');
-        $val->add_field('employee_skills', 'ทักษะ / ความสามารถ', 'required');
+        // $val->add_field('employee_bdate', 'วันเดือนปีเกิด', 'required');
+        $val->add_field('province_id', 'จังหวัด', 'required');
+        $val->add_field('employee_phone', 'หมายเลขโทรศัพท์', 'required|max_length[255]');
+        $val->add_field('employee_email', 'อีเมล', 'required|max_length[255]|valid_email');
+        $val->add_field('employee_prefer', 'ประเภทงานที่สนใจ', 'required');;
 
         return $val;
+
     }
 
     public static function get_job_cats(){

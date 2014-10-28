@@ -242,8 +242,97 @@ class Controller_Job extends Controller_Common {
                     $job = Model_Job::forge($config);
 
                     if ($job and $job->save()){
+
+                        /* generate tags */
+                        $title = $job->job_title;
+                        $title_tags = parent::split_tags($title);
+
+                        if($job->employer_id){
+                            $employer = Model_Employer::find($job->employer_id);
+                            $company_tags = parent::split_tags($employer->employer_name);
+                        } else {
+                            $company_tags = array();
+                        }
+
+                        $tags = array_merge($title_tags,$company_tags);
+
+                        foreach($tags as $t){
+
+                            $t = strtolower(trim($t));
+
+                            if(!strlen($t) || $t == " ") continue;
+
+                            $tag = Model_JobTag::get_tag($job->id,$t);
+
+                            if(!$tag){
+
+                                $tag = Model_JobTag::forge(array(
+                                    'job_id' => $job->id,
+                                    'tag_name' => $t,
+                                    'created_at' => time()
+                                ));
+
+                                $tag->save();
+
+                            }
+
+                        }
+                        /* */
+
+                        /* generate ref. no. */
+                        if(!strlen($job->ref_no)){
+                            $job->job_tags = implode(",",Model_JobTag::get_tags_by_job($job->id));
+                            $job->ref_no = "J".str_pad($job->id,7,"0",STR_PAD_LEFT);
+                            $job->save();
+                        }
+
+                        $qualifications = explode(",",Input::post('job_qualifications'));
+
+                        foreach($qualifications as $q){
+
+                            if(!strlen(trim($q))) continue;
+
+                            $qual = Model_JobQualification::get_qualification($job->id,trim($q));
+
+                            if(!$qual){
+
+                                $qual = Model_JobQualification::forge(array(
+                                    'job_id' => $job->id,
+                                    'qualification_title' => trim($q),
+                                    'created_at' => time()
+                                ));
+
+                                $qual->save();
+
+                            }
+
+                        }
+
+                        $skills = explode(",",Input::post('job_skills'));
+
+                        foreach($skills as $s){
+
+                            if(!strlen(trim($s))) continue;
+
+                            $skill = Model_JobSkill::get_skill($job->id,trim($s));
+
+                            if(!$skill){
+
+                                $skill = Model_JobSkill::forge(array(
+                                    'job_id' => $job->id,
+                                    'skill_title' => trim($s),
+                                    'created_at' => time()
+                                ));
+
+                                $skill->save();
+
+                            }
+
+                        }
+
                         Session::set_flash('success', 'Added job #' . $job->id . '.');
                         Response::redirect('job');
+
                     } else {
                         Session::set_flash('error', 'Could not save job.');
                     }
@@ -448,9 +537,97 @@ class Controller_Job extends Controller_Common {
                     }
 
                     if ($job->save()) {
-                        Session::set_flash('success', 'Updated job #' . $id);
 
+                        /* generate tags */
+                        $title = $job->job_title;
+                        $title_tags = parent::split_tags($title);
+
+                        if($job->employer_id){
+                            $employer = Model_Employer::find($job->employer_id);
+                            $company_tags = parent::split_tags($employer->employer_name);
+                        } else {
+                            $company_tags = array();
+                        }
+
+                        $tags = array_merge($title_tags,$company_tags);
+
+                        foreach($tags as $t){
+
+                            $t = strtolower(trim($t));
+
+                            if(!strlen($t) || $t == " ") continue;
+
+                            $tag = Model_JobTag::get_tag($job->id,$t);
+
+                            if(!$tag){
+
+                                $tag = Model_JobTag::forge(array(
+                                    'job_id' => $job->id,
+                                    'tag_name' => $t,
+                                    'created_at' => time()
+                                ));
+
+                                $tag->save();
+
+                            }
+
+                        }
+                        /* */
+
+                        /* generate ref. no. */
+                        if(!strlen($job->ref_no)){
+                            $job->job_tags = implode(",",Model_JobTag::get_tags_by_job($job->id));
+                            $job->ref_no = "J".str_pad($job->id,7,"0",STR_PAD_LEFT);
+                            $job->save();
+                        }
+
+                        $qualifications = explode(",",Input::post('job_qualifications'));
+
+                        foreach($qualifications as $q){
+
+                            if(!strlen(trim($q))) continue;
+
+                            $qual = Model_JobQualification::get_qualification($job->id,trim($q));
+
+                            if(!$qual){
+
+                                $qual = Model_JobQualification::forge(array(
+                                    'job_id' => $job->id,
+                                    'qualification_title' => trim($q),
+                                    'created_at' => time()
+                                ));
+
+                                $qual->save();
+
+                            }
+
+                        }
+
+                        $skills = explode(",",Input::post('job_skills'));
+
+                        foreach($skills as $s){
+
+                            if(!strlen(trim($s))) continue;
+
+                            $skill = Model_JobSkill::get_skill($job->id,trim($s));
+
+                            if(!$skill){
+
+                                $skill = Model_JobSkill::forge(array(
+                                    'job_id' => $job->id,
+                                    'skill_title' => trim($s),
+                                    'created_at' => time()
+                                ));
+
+                                $skill->save();
+
+                            }
+
+                        }
+
+                        Session::set_flash('success', 'Updated job #' . $id);
                         Response::redirect('job');
+
                     } else {
                         Session::set_flash('error', 'Could not update job #' . $id);
                     }

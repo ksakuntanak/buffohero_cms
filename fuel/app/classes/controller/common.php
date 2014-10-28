@@ -365,4 +365,50 @@ class Controller_Common extends Controller_Template {
         imagedestroy($source_image);
     }
 
+    public static function split_tags($text){
+
+        $text = str_replace("รับสมัคร","",$text);
+        $text = str_replace("จำนวน","",$text);
+        $text = str_replace("จำนวนมาก","",$text);
+        $text = str_replace("อัตรา","",$text);
+
+        $text = str_replace("บริษัท","",$text);
+        $text = str_replace("จำกัด","",$text);
+        $text = str_replace("มหาชน","",$text);
+
+        $text = str_replace("Co.","",$text);
+        $text = str_replace("Ltd.","",$text);
+
+        $text = str_replace("("," ",$text);
+        $text = str_replace(")"," ",$text);
+        $text = str_replace("{"," ",$text);
+        $text = str_replace("}"," ",$text);
+        $text = str_replace("["," ",$text);
+        $text = str_replace("]"," ",$text);
+        $text = str_replace("!"," ",$text);
+        $text = str_replace("?"," ",$text);
+
+        $text = str_replace("+"," ",$text);
+        $text = str_replace("-"," ",$text);
+        $text = str_replace("*"," ",$text);
+        $text = str_replace("/"," ",$text);
+        $text = str_replace(","," ",$text);
+        $text = str_replace("="," ",$text);
+        $text = str_replace("&"," ",$text);
+
+        $text = preg_replace("/[0-9]+/i","",$text);
+
+        $tags = explode(" ",$text);
+
+        $result = array();
+
+        foreach($tags as $t){
+            if(!strlen(trim($t)) || trim($t) == " ") continue;
+            $result[] = trim($t);
+        }
+
+        return $tags;
+
+    }
+
 }

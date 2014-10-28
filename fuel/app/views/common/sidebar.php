@@ -48,5 +48,8 @@
         <li class="<?php if($controller == 'help') { ?>active<?php } else { ?>panel<?php } ?>">
             <a href="<?php echo Uri::create('help'); ?>"><i class="fa fa-question-circle"></i> <span class="name">Helps</span></a>
         </li>
+        <li class="<?php if($controller == 'contact') { ?>active<?php } else { ?>panel<?php } ?>">
+            <a href="<?php echo Uri::create('contact'); ?>"><i class="fa fa-envelope-o"></i> <span class="name">Contact</span></a>
+        </li>
     </ul>
 </nav>

@@ -70,10 +70,18 @@ class Model_Job extends Model {
 
         foreach($select as $s){
 
-            $employer = Model_Employer::find($s['employer_id']);
-
             $row = $s;
-            $row['employer_name'] = $employer->employer_name;
+
+            if($s['employer_id']){
+
+                $employer = Model_Employer::find($s['employer_id']);
+                $row['employer_name'] = $employer->employer_name;
+
+            } else {
+
+                $row['employer_name'] = "ไม่ระบุ";
+
+            }
 
             $result['rows'][] = $row;
 

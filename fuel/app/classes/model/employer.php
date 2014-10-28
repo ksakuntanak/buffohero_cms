@@ -38,7 +38,7 @@ class Model_Employer extends Model {
         $val = Validation::forge($factory);
 
         $val->add_field('employer_name', 'Employer Name', 'required|max_length[255]');
-        $val->add_field('employer_tel', 'Tel', 'required|max_length[255]');
+        // $val->add_field('employer_tel', 'Tel', 'required|max_length[255]');
         $val->add_field('employer_email', 'E-Mail', 'required|max_length[255]');
         $val->add_field('province_id', 'Province', 'required');
 

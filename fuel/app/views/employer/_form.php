@@ -55,7 +55,7 @@
             </div>
         </div>
         <div class="form-group">
-            <?php echo Form::label('โทรศัพท์ <span class="required">*</span>', 'employer_tel', array('class' => 'control-label')); ?>
+            <?php echo Form::label('โทรศัพท์', 'employer_tel', array('class' => 'control-label')); ?>
             <div class="controls form-group">
                 <?php echo Form::input('employer_tel', Input::post('employer_tel', isset($employer) ? $employer->employer_tel : ''), array('class' => 'form-control', 'placeholder' => 'ระบุหมายเลขโทรศัพท์')); ?>
             </div>
@@ -91,7 +91,7 @@
         </div>
         <?php if(isset($employer) && strlen($employer->employer_photo)) { ?>
         <div class="form-group">
-            <?php echo Form::label('ไฟล์ภาพ Logo ที่มีอยู่','employer_photo_file_file', array('class' => 'control-label')); ?>
+            <?php echo Form::label('ไฟล์ภาพที่มีอยู่','employer_photo_file', array('class' => 'control-label')); ?>
             <div class="controls form-group">
                 <img src="//buffohero.com/uploads/profile_photo/employer/<?php echo $employer->employer_photo; ?>" border="0" style="width:400px;" />
             </div>
