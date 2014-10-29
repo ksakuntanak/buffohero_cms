@@ -205,7 +205,27 @@
             <?php echo Form::label('งบประมาณ/ค่าแรง <span class="required">*</span>', 'job_budget', array('class' => 'control-label')); ?>
             <div class="controls form-group">
                 <?php echo Form::input('job_budget', Input::post('job_budget', isset($job) ? $job->job_budget : ''), array('class' => 'form-control', 'placeholder' => 'ระบุงบประมาณ/ค่าแรง')); ?>
-                <p class="help-block">กรอกได้ทั้งตัวเลขและตัวหนังสือ เช่น 50000 Baht, 1000 Baht/Page (ไม่เกิน 255 ตัวอักษร)</p>
+                <p class="help-block">เป็นตัวเลขเท่านั้น และไม่มี comma เช่น 50000</p>
+            </div>
+        </div>
+        <div class="form-group" id="job-budget-type" <?php if(!isset($job) || $job->job_type!="project") { ?>style="display:none;"<?php } ?>>
+            <?php echo Form::label('ประเภท <span class="required">*</span>', 'job_budget_type', array('class' => 'control-label')); ?>
+            <div class="controls form-group">
+                <div class="btn-group" data-toggle="buttons">
+                    <label id="type-fixed" class="btn btn-<?php echo (isset($job)&&$job->job_budget_type == "fixed")?"primary":"default"; ?>" data-toggle-class="btn-primary" data-toggle-passive-class="btn-default">
+                        <input type="radio" name="job_budget_type" value="fixed" <?php if(isset($job) && $job->job_budget_type == "fixed"){ ?>checked="checked" <?php } ?>> ราคาคงที่
+                    </label>
+                    <label id="type-perunit" class="btn btn-<?php echo (isset($job)&&$job->job_budget_type == "perunit")?"primary":"default"; ?>" data-toggle-class="btn-primary" data-toggle-passive-class="btn-default">
+                        <input type="radio" name="job_budget_type" value="perunit" <?php if(isset($job) && $job->job_budget_type == "perunit"){ ?>checked="checked" <?php } ?>> ราคาต่อหน่วย
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group" id="job-budget-unit" <?php if(!isset($job) || $job->job_type != "project" || $job->job_type == "project" && $job->job_budget_type != "perunit") { ?>style="display:none;"<?php } ?>>
+            <?php echo Form::label('หน่วย <span class="required">*</span>', 'job_budget_unit', array('class' => 'control-label')); ?>
+            <div class="controls form-group">
+                <?php echo Form::input('job_budget_unit', Input::post('job_budget_unit', isset($job) ? $job->job_budget_unit:''), array('class' => 'form-control', 'placeholder' => 'ระบุหน่วยของงบประมาณ/ค่าแรง')); ?>
+                <p class="help-block">เช่น หน้า, วัน, ชั่วโมง (ไม่เกิน 255 ตัวอักษร)</p>
             </div>
         </div>
         <div class="form-group" id="job-prize" <?php if(!isset($job) || $job->job_type!="contest") { ?>style="display:none;"<?php } ?>>
@@ -281,5 +301,9 @@
     <?php echo Form::close(); ?>
 </div>
 <script type="text/javascript">
+
     var subcats = <?php echo html_entity_decode($subcats); ?>;
+
+
+
 </script>

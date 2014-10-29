@@ -89,11 +89,13 @@ class Controller_Job extends Controller_Common {
 
             if(Input::post('job_type') == "fulltime"){
                 $val->add_field('job_title_fulltime', 'Job Title', 'required|max_length[255]');
-                $val->add_field('job_salary', 'Salary', 'required|max_length[255]');
+                $val->add_field('job_salary', 'Salary', 'required|is_numeric');
             } else if(Input::post('job_type') == "project"){
                 $val->add_field('job_title_project', 'Job Title', 'required|max_length[255]');
-                //$val->add_field('job_budget_type', 'Price offer', 'required');
-                $val->add_field('job_budget', 'Budget', 'required|max_length[255]');
+                $val->add_field('job_budget_type', 'Price offer', 'required');
+                $val->add_field('job_budget', 'Budget', 'required|is_numeric');
+                if(Input::post('job_budget_type') == "perunit")
+                    $val->add_field('job_budget_unit', 'Unit', 'required|max_length[255]');
             } else if(Input::post('job_type') == "contest"){
                 $val->add_field('job_title_contest', 'Job Title', 'required|max_length[255]');
                 $val->add_field('job_prize', 'Prize', 'required|max_length[255]');
@@ -232,8 +234,9 @@ class Controller_Job extends Controller_Common {
                         $config['job_salary'] = Input::post('job_salary');
                     } else if(Input::post('job_type') == "project"){
                         $config['job_title'] = Input::post('job_title_project');
-                        $config['job_budget_type'] = 'fixed';
                         $config['job_budget'] = Input::post('job_budget');
+                        $config['job_budget_type'] = Input::post('job_budget_type');
+                        $config['job_budget_unit'] = Input::post('job_budget_unit');
                     } else if(Input::post('job_type') == "contest"){
                         $config['job_title'] = Input::post('job_title_contest');
                         $config['job_prize'] = Input::post('job_prize');
@@ -408,11 +411,13 @@ class Controller_Job extends Controller_Common {
 
             if(Input::post('job_type') == "fulltime"){
                 $val->add_field('job_title_fulltime', 'Job Title', 'required|max_length[255]');
-                $val->add_field('job_salary', 'Salary', 'required|max_length[255]');
+                $val->add_field('job_salary', 'Salary', 'required|is_numeric');
             } else if(Input::post('job_type') == "project"){
                 $val->add_field('job_title_project', 'Job Title', 'required|max_length[255]');
-                //$val->add_field('job_budget_type', 'Price offer', 'required');
-                $val->add_field('job_budget', 'Budget', 'required|max_length[255]');
+                $val->add_field('job_budget_type', 'Price offer', 'required');
+                $val->add_field('job_budget', 'Budget', 'required|is_numeric');
+                if(Input::post('job_budget_type') == "perunit")
+                    $val->add_field('job_budget_unit', 'Unit', 'required|max_length[255]');
             } else if(Input::post('job_type') == "contest"){
                 $val->add_field('job_title_contest', 'Job Title', 'required|max_length[255]');
                 $val->add_field('job_prize', 'Prize', 'required|max_length[255]');
@@ -531,6 +536,8 @@ class Controller_Job extends Controller_Common {
                     } else if(Input::post('job_type') == "project"){
                         $job->job_title = Input::post('job_title_project');
                         $job->job_budget = Input::post('job_budget');
+                        $job->job_budget_type = Input::post('job_budget_type');
+                        $job->job_budget_unit = Input::post('job_budget_unit');
                     } else if(Input::post('job_type') == "contest"){
                         $job->job_title = Input::post('job_title_contest');
                         $job->job_prize = Input::post('job_prize');

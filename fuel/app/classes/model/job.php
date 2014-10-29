@@ -25,6 +25,7 @@ class Model_Job extends Model {
         'job_salary_negotiable',
         'job_budget',
         'job_budget_type',
+        'job_budget_unit',
         'job_prize',
         'job_attachment',
         'job_is_featured',
